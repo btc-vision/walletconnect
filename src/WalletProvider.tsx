@@ -56,10 +56,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             walletConnection.getWalletInstance().on('chainChanged', async () => {
                 setNetwork(await walletConnection.getNetwork());
+                setProvider(await walletConnection.getProvider());
             });
 
             walletConnection.getWalletInstance().on('networkChanged', async () => {
                 setNetwork(await walletConnection.getNetwork());
+                setProvider(await walletConnection.getProvider());
             });
         },
         [walletConnection],
