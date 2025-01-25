@@ -55,18 +55,6 @@ export class WalletConnection {
     }
 
     /**
-     * @description Get the wallet instance of the connected wallet
-     * @returns {Wallets}
-     */
-    public getWalletInstance(): Wallets {
-        if (!this.signer) throw new Error('Wallet not connected');
-
-        if (this.signer instanceof UnisatSigner) return this.signer.unisat;
-
-        throw new Error('Unsupported wallet');
-    }
-
-    /**
      * @description Get the address of the connected wallet
      * @returns {Address}
      */

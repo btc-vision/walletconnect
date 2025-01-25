@@ -1,5 +1,5 @@
 import { Network } from '@btc-vision/bitcoin';
-import { Address } from '@btc-vision/transaction';
+import { Address, UnisatSigner } from '@btc-vision/transaction';
 import { JSONRpcProvider } from 'opnet';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import WalletConnection, { Signers, SupportedWallets } from './WalletConnection';
@@ -46,23 +46,25 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setIsConnected(true);
             localStorage.setItem('walletType', walletType);
 
-            walletConnection.getWalletInstance().on('disconnect', () => {
-                disconnect();
-            });
+            if (walletConnection.signer instanceof UnisatSigner) {
+                walletConnection.signer.unisat.on('disconnect', () => {
+                    disconnect();
+                });
 
-            walletConnection.getWalletInstance().on('accountsChanged', async () => {
-                setAddress(await walletConnection.getAddress());
-            });
+                walletConnection.signer.unisat.on('accountsChanged', async () => {
+                    setAddress(await walletConnection.getAddress());
+                });
 
-            walletConnection.getWalletInstance().on('chainChanged', async () => {
-                setNetwork(await walletConnection.getNetwork());
-                setProvider(await walletConnection.getProvider());
-            });
+                walletConnection.signer.unisat.on('chainChanged', async () => {
+                    setNetwork(await walletConnection.getNetwork());
+                    setProvider(await walletConnection.getProvider());
+                });
 
-            walletConnection.getWalletInstance().on('networkChanged', async () => {
-                setNetwork(await walletConnection.getNetwork());
-                setProvider(await walletConnection.getProvider());
-            });
+                walletConnection.signer.unisat.on('networkChanged', async () => {
+                    setNetwork(await walletConnection.getNetwork());
+                    setProvider(await walletConnection.getProvider());
+                });
+            }
         },
         [walletConnection],
     );
