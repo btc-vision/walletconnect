@@ -8,6 +8,10 @@ export default {
             import: './src/index.ts',
         },
     },
+    externals: {
+        react: 'react',
+        'react-dom': 'react-dom',
+    },
     watch: false,
     output: {
         filename: 'index.js',

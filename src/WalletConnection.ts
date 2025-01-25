@@ -89,12 +89,12 @@ export class WalletConnection {
 
         if (this.wallet_type === SupportedWallets.OP_WALLET && this.op_wallet) {
             // TODO: Add Fractal network
-            switch (this.op_wallet.network) {
-                case networks.bitcoin:
+            switch (this.op_wallet.network.bech32) {
+                case networks.bitcoin.bech32:
                     return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
-                case networks.testnet:
+                case networks.testnet.bech32:
                     return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
-                case networks.regtest:
+                case networks.regtest.bech32:
                     return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
                 default:
                     throw new Error('Unsupported network');
