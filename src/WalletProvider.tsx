@@ -1,7 +1,7 @@
 import { Network } from '@btc-vision/bitcoin';
 import { Address } from '@btc-vision/transaction';
 import { JSONRpcProvider } from 'opnet';
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import WalletConnection, { Signers, SupportedWallets } from './WalletConnection';
 
 interface WalletContextType {
@@ -24,6 +24,17 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [provider, setProvider] = useState<JSONRpcProvider | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
+    useEffect(() => {
+        const storedWalletType = localStorage.getItem('walletType') as SupportedWallets | null;
+
+        if (storedWalletType) {
+            connect(storedWalletType).catch((error: unknown) => {
+                console.error('Failed to reconnect wallet:', error);
+                disconnect();
+            });
+        }
+    }, []);
+
     const connect = useCallback(
         async (walletType: SupportedWallets) => {
             await walletConnection.connect(walletType);
@@ -33,6 +44,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setNetwork(await walletConnection.getNetwork());
             setProvider(await walletConnection.getProvider());
             setIsConnected(true);
+            localStorage.setItem('walletType', walletType);
 
             walletConnection.getWalletInstance().on('disconnect', () => {
                 disconnect();
@@ -60,6 +72,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setNetwork(null);
         setProvider(null);
         setIsConnected(false);
+        localStorage.removeItem('walletType');
     }, [walletConnection]);
 
     const value = {
