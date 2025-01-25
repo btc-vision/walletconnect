@@ -56,7 +56,7 @@ export class WalletConnection {
 
     /**
      * @description Get the address of the connected wallet
-     * @returns {Address}
+     * @returns {Promise<Address>}
      */
     public async getAddress(): Promise<Address> {
         if (!this.signer) throw new Error('Wallet not connected');
@@ -72,7 +72,7 @@ export class WalletConnection {
 
     /**
      * @description Get the network of the connected wallet
-     * @returns {Network}
+     * @returns {Promise<Network>}
      */
     public async getNetwork(): Promise<Network> {
         if (!this.signer) throw new Error('Wallet not connected');
@@ -98,7 +98,7 @@ export class WalletConnection {
 
     /**
      * @description Get the provider of the connected wallet
-     * @returns {JSONRpcProvider}
+     * @returns {Promise<JSONRpcProvider>}
      */
     public async getProvider(): Promise<JSONRpcProvider> {
         if (!this.signer) throw new Error('Wallet not connected');
