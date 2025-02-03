@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "impredmet",
     "description": "OPNet Wallet Connect library allows you to connect to any WalletConnect compatible wallet.",
     "engines": {
@@ -74,7 +74,7 @@
         "@babel/preset-flow": "^7.25.9",
         "@babel/preset-react": "^7.26.3",
         "@babel/preset-typescript": "^7.26.0",
-        "@types/node": "^22.10.10",
+        "@types/node": "^22.13.0",
         "@types/react": "^19.0.8",
         "@types/sha.js": "^2.4.4",
         "eslint": "^9.19.0",
@@ -89,14 +89,14 @@
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
         "typedoc": "^0.27.6",
-        "typescript-eslint": "^8.21.0",
+        "typescript-eslint": "^8.22.0",
         "webpack-cli": "^6.0.1"
     },
     "dependencies": {
         "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
         "@bitcoinerlab/secp256k1": "^1.2.0",
         "@btc-vision/bitcoin": "^6.3.6",
-        "@btc-vision/bitcoin-rpc": "^1.0.0",
+        "@btc-vision/bitcoin-rpc": "^1.0.1",
         "@btc-vision/logger": "^1.0.6",
         "@btc-vision/transaction": "^1.2.10",
         "@eslint/js": "^9.19.0",
@@ -115,7 +115,7 @@
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.4.0",
         "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.2.23",
+        "opnet": "^1.2.24",
         "process": "^0.11.10",
         "sha.js": "^2.4.11",
         "ts-loader": "^9.5.2",

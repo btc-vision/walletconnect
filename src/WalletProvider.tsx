@@ -1,6 +1,6 @@
 import { Network } from '@btc-vision/bitcoin';
 import { Address, UnisatSigner } from '@btc-vision/transaction';
-import { JSONRpcProvider } from 'opnet';
+import { AbstractRpcProvider } from 'opnet';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import WalletConnection, { Signers, SupportedWallets } from './WalletConnection';
 
@@ -10,7 +10,7 @@ interface WalletContextType {
     address: Address | null;
     signer: Signers | null;
     network: Network | null;
-    provider: JSONRpcProvider | null;
+    provider: AbstractRpcProvider | null;
     isConnected: boolean;
 }
 
@@ -21,7 +21,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [address, setAddress] = useState<Address | null>(null);
     const [signer, setSigner] = useState<Signers | null>(null);
     const [network, setNetwork] = useState<Network | null>(null);
-    const [provider, setProvider] = useState<JSONRpcProvider | null>(null);
+    const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {

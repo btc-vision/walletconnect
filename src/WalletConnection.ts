@@ -1,6 +1,6 @@
 import { Network, networks } from '@btc-vision/bitcoin';
 import { Address, Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
-import { JSONRpcProvider } from 'opnet';
+import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 
 export enum SupportedWallets {
     OP_WALLET = 'op_wallet',
@@ -98,9 +98,9 @@ export class WalletConnection {
 
     /**
      * @description Get the provider of the connected wallet
-     * @returns {Promise<JSONRpcProvider>}
+     * @returns {Promise<AbstractRpcProvider>}
      */
-    public async getProvider(): Promise<JSONRpcProvider> {
+    public async getProvider(): Promise<AbstractRpcProvider> {
         if (!this.signer) throw new Error('Wallet not connected');
 
         if (this.signer instanceof UnisatSigner) {
