@@ -10,7 +10,7 @@ export type Signers = UnisatSigner;
 export type Wallets = Unisat;
 
 export class WalletConnection {
-    public signer: Signers | null = null;
+    public signer: Signers | null = null; // OP_WALLET doesn't need a signer
     public walletType: SupportedWallets | null = null;
     public walletWindowInstance: Wallets | null = null;
 
@@ -29,10 +29,6 @@ export class WalletConnection {
                     try {
                         await window.opnet.requestAccounts(); // Trick on OP_WALLET: force the connection popup to appear
 
-                        const signer = new UnisatSigner();
-                        await signer.init();
-
-                        this.signer = signer;
                         this.walletType = walletType;
                         this.walletWindowInstance = window.opnet;
                         return;

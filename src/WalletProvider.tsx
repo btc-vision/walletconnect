@@ -49,7 +49,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         async (walletType: SupportedWallets) => {
             await walletConnection.connect(walletType);
 
-            if (!walletConnection.signer || !walletConnection.walletWindowInstance)
+            // OP_WALLET doesn't need a signer
+            if (
+                (walletConnection.walletType !== SupportedWallets.OP_WALLET &&
+                    !walletConnection.signer) ||
+                !walletConnection.walletWindowInstance
+            )
                 throw new Error('Failed to connect to wallet');
 
             setIsConnected(true);
