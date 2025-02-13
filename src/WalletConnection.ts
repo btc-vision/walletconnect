@@ -176,8 +176,7 @@ export class WalletConnection {
                     return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
                 case UnisatChainType.BITCOIN_REGTEST:
                     return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
-                case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
-                    return new JSONRpcProvider('https://fractal.opnet.org', networks.bitcoin);
+                // TODO: Add Fractal Mainnet & Testnet when available
                 default:
                     throw new Error('Unsupported network');
             }
