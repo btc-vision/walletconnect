@@ -37,9 +37,19 @@ export class WalletConnection {
                         this.walletWindowInstance = window.opnet;
                         return;
                     } catch (error: unknown) {
+                        if (!error) return;
+
                         if (error instanceof Error) throw new Error(error.message);
 
-                        throw new Error(`Unknown error: ${error}`);
+                        if (
+                            typeof error === 'object' &&
+                            'message' in error &&
+                            typeof error.message === 'string'
+                        )
+                            throw new Error(error.message);
+
+                        console.error(error);
+                        throw new Error(`Unknown error, check console`);
                     }
                 } else {
                     throw new Error('OP_WALLET not found');
@@ -58,9 +68,19 @@ export class WalletConnection {
                         this.walletWindowInstance = window.unisat;
                         return;
                     } catch (error: unknown) {
+                        if (!error) return;
+
                         if (error instanceof Error) throw new Error(error.message);
 
-                        throw new Error(`Unknown error: ${error}`);
+                        if (
+                            typeof error === 'object' &&
+                            'message' in error &&
+                            typeof error.message === 'string'
+                        )
+                            throw new Error(error.message);
+
+                        console.error(error);
+                        throw new Error(`Unknown error, check console`);
                     }
                 } else {
                     throw new Error('Unisat not found');
