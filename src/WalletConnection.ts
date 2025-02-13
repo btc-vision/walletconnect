@@ -144,6 +144,10 @@ export class WalletConnection {
                     return networks.testnet;
                 case UnisatChainType.BITCOIN_REGTEST:
                     return networks.regtest;
+                case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
+                    return networks.bitcoin;
+                case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
+                    return networks.testnet;
                 default:
                     throw new Error('Unsupported network');
             }
