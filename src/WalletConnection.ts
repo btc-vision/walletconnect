@@ -161,18 +161,29 @@ export class WalletConnection {
      * @returns {Promise<AbstractRpcProvider>}
      */
     public async getProvider(): Promise<AbstractRpcProvider> {
-        const network = await this.getNetwork();
+        if (!this.walletWindowInstance) throw new Error('Wallet not connected');
 
-        switch (network.bech32) {
-            case networks.bitcoin.bech32:
-                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
-            case networks.testnet.bech32:
-                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
-            case networks.regtest.bech32:
-                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
-            default:
-                throw new Error('Unsupported network');
+        if (
+            this.walletType === SupportedWallets.OP_WALLET ||
+            this.walletType === SupportedWallets.UNISAT
+        ) {
+            const chain = await this.walletWindowInstance.getChain();
+
+            switch (chain.enum) {
+                case UnisatChainType.BITCOIN_MAINNET:
+                    return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+                case UnisatChainType.BITCOIN_TESTNET:
+                    return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+                case UnisatChainType.BITCOIN_REGTEST:
+                    return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+                case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
+                    return new JSONRpcProvider('https://fractal.opnet.org', networks.bitcoin);
+                default:
+                    throw new Error('Unsupported network');
+            }
         }
+
+        throw new Error('Unsupported wallet');
     }
 }
 
