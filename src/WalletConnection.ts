@@ -4,12 +4,15 @@ import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 
 export enum SupportedWallets {
     OP_WALLET = 'op_wallet',
+    UNISAT = 'unisat',
 }
 export type Signers = UnisatSigner;
 export type Wallets = Unisat;
 
 export class WalletConnection {
     public signer: Signers | null = null;
+    public walletType: SupportedWallets | null = null;
+    public walletWindowInstance: Wallets | null = null;
 
     /**
      * @description Connect to the wallet
@@ -17,17 +20,21 @@ export class WalletConnection {
      * @returns {Promise<void>}
      */
     public async connect(walletType: SupportedWallets): Promise<void> {
-        // TODO: When more wallets are supported, make them disconnect before connecting to the new one
-        switch (walletType) {
-            case SupportedWallets.OP_WALLET:
-                if (this.signer instanceof UnisatSigner) return;
+        if (this.walletType === walletType) return;
+        if (this.walletType) this.disconnect();
 
-                if (window.opnet || window.unisat) {
+        switch (walletType) {
+            case SupportedWallets.OP_WALLET: {
+                if (window.opnet) {
                     try {
+                        await window.opnet.requestAccounts(); // Trick on OP_WALLET: force the connection popup to appear
+
                         const signer = new UnisatSigner();
                         await signer.init();
 
                         this.signer = signer;
+                        this.walletType = walletType;
+                        this.walletWindowInstance = window.opnet;
                         return;
                     } catch (error: unknown) {
                         if (error instanceof Error) throw new Error(error.message);
@@ -35,8 +42,30 @@ export class WalletConnection {
                         throw new Error(`Unknown error: ${error}`);
                     }
                 } else {
-                    throw new Error('OP Wallet not found');
+                    throw new Error('OP_WALLET not found');
                 }
+            }
+            case SupportedWallets.UNISAT: {
+                if (window.unisat) {
+                    try {
+                        await window.unisat.requestAccounts(); // Trick on Unisat: force the connection popup to appear
+
+                        const signer = new UnisatSigner();
+                        await signer.init();
+
+                        this.signer = signer;
+                        this.walletType = walletType;
+                        this.walletWindowInstance = window.unisat;
+                        return;
+                    } catch (error: unknown) {
+                        if (error instanceof Error) throw new Error(error.message);
+
+                        throw new Error(`Unknown error: ${error}`);
+                    }
+                } else {
+                    throw new Error('Unisat not found');
+                }
+            }
             default:
                 throw new Error('Unsupported wallet');
         }
@@ -47,11 +76,17 @@ export class WalletConnection {
      * @returns {void}
      */
     public disconnect(): void {
-        if (!this.signer) throw new Error('Wallet not connected');
+        if (!this.walletWindowInstance) return;
 
-        if (this.signer instanceof UnisatSigner) this.signer.unisat.disconnect();
+        if (
+            this.walletType === SupportedWallets.OP_WALLET ||
+            this.walletType === SupportedWallets.UNISAT
+        )
+            this.walletWindowInstance.disconnect();
 
         this.signer = null;
+        this.walletType = null;
+        this.walletWindowInstance = null;
     }
 
     /**
@@ -59,10 +94,13 @@ export class WalletConnection {
      * @returns {Promise<Address>}
      */
     public async getAddress(): Promise<Address> {
-        if (!this.signer) throw new Error('Wallet not connected');
+        if (!this.walletWindowInstance) throw new Error('Wallet not connected');
 
-        if (this.signer instanceof UnisatSigner) {
-            const publicKey = await this.signer.unisat.getPublicKey();
+        if (
+            this.walletType === SupportedWallets.OP_WALLET ||
+            this.walletType === SupportedWallets.UNISAT
+        ) {
+            const publicKey = await this.walletWindowInstance.getPublicKey();
 
             return Address.fromString(publicKey);
         }
@@ -75,12 +113,14 @@ export class WalletConnection {
      * @returns {Promise<Network>}
      */
     public async getNetwork(): Promise<Network> {
-        if (!this.signer) throw new Error('Wallet not connected');
+        if (!this.walletWindowInstance) throw new Error('Wallet not connected');
 
-        if (this.signer instanceof UnisatSigner) {
-            const chain = await this.signer.unisat.getChain();
+        if (
+            this.walletType === SupportedWallets.OP_WALLET ||
+            this.walletType === SupportedWallets.UNISAT
+        ) {
+            const chain = await this.walletWindowInstance.getChain();
 
-            // TODO: Add Fractal network
             switch (chain.enum) {
                 case UnisatChainType.BITCOIN_MAINNET:
                     return networks.bitcoin;
@@ -101,25 +141,18 @@ export class WalletConnection {
      * @returns {Promise<AbstractRpcProvider>}
      */
     public async getProvider(): Promise<AbstractRpcProvider> {
-        if (!this.signer) throw new Error('Wallet not connected');
+        const network = await this.getNetwork();
 
-        if (this.signer instanceof UnisatSigner) {
-            const network = await this.getNetwork();
-
-            // TODO: Add Fractal network
-            switch (network.bech32) {
-                case networks.bitcoin.bech32:
-                    return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
-                case networks.testnet.bech32:
-                    return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
-                case networks.regtest.bech32:
-                    return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
-                default:
-                    throw new Error('Unsupported network');
-            }
+        switch (network.bech32) {
+            case networks.bitcoin.bech32:
+                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+            case networks.testnet.bech32:
+                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+            case networks.regtest.bech32:
+                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+            default:
+                throw new Error('Unsupported network');
         }
-
-        throw new Error('Unsupported wallet');
     }
 }
 

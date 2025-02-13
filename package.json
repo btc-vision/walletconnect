@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "author": "impredmet",
     "description": "OPNet Wallet Connect library allows you to connect to any WalletConnect compatible wallet.",
     "engines": {
