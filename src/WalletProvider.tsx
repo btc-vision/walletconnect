@@ -79,21 +79,36 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 walletConnection.walletWindowInstance.on('accountsChanged', async () => {
                     if (!walletConnection.walletWindowInstance) return;
 
-                    setAddress(await walletConnection.getAddress());
+                    try {
+                        setAddress(await walletConnection.getAddress());
+                    } catch (error) {
+                        disconnect();
+                        throw error;
+                    }
                 });
 
                 walletConnection.walletWindowInstance.on('chainChanged', async () => {
                     if (!walletConnection.walletWindowInstance) return;
 
-                    setNetwork(await walletConnection.getNetwork());
-                    setProvider(await walletConnection.getProvider());
+                    try {
+                        setNetwork(await walletConnection.getNetwork());
+                        setProvider(await walletConnection.getProvider());
+                    } catch (error) {
+                        disconnect();
+                        throw error;
+                    }
                 });
 
                 walletConnection.walletWindowInstance.on('networkChanged', async () => {
                     if (!walletConnection.walletWindowInstance) return;
 
-                    setNetwork(await walletConnection.getNetwork());
-                    setProvider(await walletConnection.getProvider());
+                    try {
+                        setNetwork(await walletConnection.getNetwork());
+                        setProvider(await walletConnection.getProvider());
+                    } catch (error) {
+                        disconnect();
+                        throw error;
+                    }
                 });
             }
         },
