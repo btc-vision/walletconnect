@@ -1,38 +1,34 @@
 import { Network } from '@btc-vision/bitcoin';
 import { Address } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import WalletConnection, { Signers, SupportedWallets, Wallets } from './WalletConnection';
+
+export interface Account {
+    isConnected: boolean;
+    signer: Signers | null;
+    address: Address;
+    network: Network;
+    provider: AbstractRpcProvider;
+}
 
 interface WalletContextType {
     connect: (walletType: SupportedWallets) => Promise<void>;
     disconnect: () => void;
-
-    isConnected: boolean;
-
-    signer: Signers | null;
     walletType: SupportedWallets | null;
     walletWindowInstance: Wallets | null;
-
-    address: Address | null;
-    network: Network | null;
-    provider: AbstractRpcProvider | null;
+    account: Account | null;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [walletConnection] = useState(new WalletConnection());
-
-    const [isConnected, setIsConnected] = useState(false);
-
-    const [signer, setSigner] = useState<Signers | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
     const [walletWindowInstance, setWalletWindowInstance] = useState<Wallets | null>(null);
+    const [account, setAccount] = useState<Account | null>(null);
 
-    const [address, setAddress] = useState<Address | null>(null);
-    const [network, setNetwork] = useState<Network | null>(null);
-    const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
+    const registeredEvents = useRef(false);
 
     useEffect(() => {
         const storedWalletType = localStorage.getItem('walletType') as SupportedWallets | null;
@@ -49,7 +45,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         async (walletType: SupportedWallets) => {
             await walletConnection.connect(walletType);
 
-            // OP_WALLET doesn't need a signer
+            // For wallets other than OP_WALLET, ensure that a signer is present
             if (
                 (walletConnection.walletType !== SupportedWallets.OP_WALLET &&
                     !walletConnection.signer) ||
@@ -57,59 +53,58 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             )
                 throw new Error('Failed to connect to wallet');
 
-            setIsConnected(true);
-            localStorage.setItem('walletType', walletType);
-
-            setSigner(walletConnection.signer);
             setWalletType(walletType);
             setWalletWindowInstance(walletConnection.walletWindowInstance);
+            localStorage.setItem('walletType', walletType);
 
-            setAddress(await walletConnection.getAddress());
-            setNetwork(await walletConnection.getNetwork());
-            setProvider(await walletConnection.getProvider());
+            const signer = walletConnection.signer;
+            const address = await walletConnection.getAddress();
+            const network = await walletConnection.getNetwork();
+            const provider = await walletConnection.getProvider();
+
+            setAccount({
+                isConnected: true,
+                signer,
+                address,
+                network,
+                provider,
+            });
 
             if (
                 walletConnection.walletType === SupportedWallets.OP_WALLET ||
                 walletConnection.walletType === SupportedWallets.UNISAT
             ) {
-                walletConnection.walletWindowInstance.on('disconnect', () => {
-                    disconnect();
-                });
+                const instance = walletConnection.walletWindowInstance;
 
-                walletConnection.walletWindowInstance.on('accountsChanged', async () => {
-                    if (!walletConnection.walletWindowInstance) return;
-
-                    try {
-                        setAddress(await walletConnection.getAddress());
-                    } catch (error) {
+                if (instance && !registeredEvents.current) {
+                    instance.on('disconnect', () => {
                         disconnect();
-                        throw error;
-                    }
-                });
+                    });
 
-                walletConnection.walletWindowInstance.on('chainChanged', async () => {
-                    if (!walletConnection.walletWindowInstance) return;
+                    instance.on('accountsChanged', async () => {
+                        try {
+                            const updatedAddress = await walletConnection.getAddress();
+                            const updatedNetwork = await walletConnection.getNetwork();
+                            const updatedProvider = await walletConnection.getProvider();
 
-                    try {
-                        setNetwork(await walletConnection.getNetwork());
-                        setProvider(await walletConnection.getProvider());
-                    } catch (error) {
-                        disconnect();
-                        throw error;
-                    }
-                });
+                            setAccount((prevAccount) =>
+                                prevAccount
+                                    ? {
+                                          ...prevAccount,
+                                          address: updatedAddress,
+                                          network: updatedNetwork,
+                                          provider: updatedProvider,
+                                      }
+                                    : prevAccount,
+                            );
+                        } catch (error) {
+                            disconnect();
+                            throw error;
+                        }
+                    });
 
-                walletConnection.walletWindowInstance.on('networkChanged', async () => {
-                    if (!walletConnection.walletWindowInstance) return;
-
-                    try {
-                        setNetwork(await walletConnection.getNetwork());
-                        setProvider(await walletConnection.getProvider());
-                    } catch (error) {
-                        disconnect();
-                        throw error;
-                    }
-                });
+                    registeredEvents.current = true;
+                }
             }
         },
         [walletConnection],
@@ -117,32 +112,19 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const disconnect = useCallback(() => {
         walletConnection.disconnect();
-
-        setIsConnected(false);
-        localStorage.removeItem('walletType');
-
-        setSigner(null);
         setWalletType(null);
         setWalletWindowInstance(null);
-
-        setAddress(null);
-        setNetwork(null);
-        setProvider(null);
+        localStorage.removeItem('walletType');
+        setAccount(null);
+        registeredEvents.current = false;
     }, [walletConnection]);
 
     const value = {
         connect,
         disconnect,
-
-        isConnected,
-
-        signer,
         walletType,
         walletWindowInstance,
-
-        address,
-        network,
-        provider,
+        account,
     };
 
     return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
