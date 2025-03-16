@@ -19,7 +19,7 @@ from the connected wallet.
 
 ### Prerequisites
 
-- Node.js version 16.x or higher
+- Node.js version 22.x
 - npm (Node Package Manager)
 
 ### Installation
