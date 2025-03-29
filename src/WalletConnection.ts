@@ -125,6 +125,25 @@ export class WalletConnection {
     }
 
     /**
+     * @description Get the address typed (P2TR or Native Segwit, etc.) of the connected wallet
+     * @returns {Promise<string>}
+     */
+    public async getAddressTyped(): Promise<string> {
+        if (!this.walletWindowInstance) throw new Error('Wallet not connected');
+
+        if (
+            this.walletType === SupportedWallets.OP_WALLET ||
+            this.walletType === SupportedWallets.UNISAT
+        ) {
+            const accounts = await this.walletWindowInstance.getAccounts();
+
+            return accounts[0];
+        }
+
+        throw new Error('Unsupported wallet');
+    }
+
+    /**
      * @description Get the network of the connected wallet
      * @returns {Promise<Network>}
      */

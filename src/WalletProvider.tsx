@@ -8,6 +8,7 @@ export interface Account {
     isConnected: boolean;
     signer: Signers | null;
     address: Address;
+    addressTyped: string;
     network: Network;
     provider: AbstractRpcProvider;
 }
@@ -59,6 +60,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             const signer = walletConnection.signer;
             const address = await walletConnection.getAddress();
+            const addressTyped = await walletConnection.getAddressTyped();
             const network = await walletConnection.getNetwork();
             const provider = await walletConnection.getProvider();
 
@@ -66,6 +68,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 isConnected: true,
                 signer,
                 address,
+                addressTyped,
                 network,
                 provider,
             });
@@ -84,6 +87,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     instance.on('accountsChanged', async () => {
                         try {
                             const updatedAddress = await walletConnection.getAddress();
+                            const updatedAddressTyped = await walletConnection.getAddressTyped();
                             const updatedNetwork = await walletConnection.getNetwork();
                             const updatedProvider = await walletConnection.getProvider();
 
@@ -92,6 +96,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                     ? {
                                           ...prevAccount,
                                           address: updatedAddress,
+                                          addressTyped: updatedAddressTyped,
                                           network: updatedNetwork,
                                           provider: updatedProvider,
                                       }
