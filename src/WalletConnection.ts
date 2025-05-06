@@ -41,10 +41,12 @@ export class WalletConnection {
                             typeof error === 'object' &&
                             'message' in error &&
                             typeof error.message === 'string'
-                        )
+                        ) {
                             throw new Error(error.message);
+                        }
 
-                        console.error(error);
+                        console.warn(error);
+
                         throw new Error(`Unknown error, check console`);
                     }
                 } else {

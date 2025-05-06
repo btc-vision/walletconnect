@@ -28,10 +28,10 @@ export default {
     },
     resolve: {
         extensionAlias: {
-            '.js': ['.js', '.ts'],
+            '.js': ['.js', '.ts', '.tsx'],
         },
         modules: ['.', 'node_modules'],
-        extensions: ['.*', '.js', '.jsx', '.tsx', '.ts', '.wasm'],
+        extensions: ['.*', '.js', '.jsx', '.tsx', '.ts', '.tsx', '.wasm'],
         fallback: {
             buffer: import.meta.resolve('buffer/'),
 
