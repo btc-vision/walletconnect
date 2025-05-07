@@ -1,15 +1,16 @@
 import { Network } from '@btc-vision/bitcoin';
 import { Address } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import React, {
+import {
     createContext,
+    ReactNode,
     useCallback,
     useContext,
     useEffect,
     useRef,
     useState,
 } from 'react';
-import WalletConnection, { Signers, SupportedWallets, Wallets } from './WalletConnection.js';
+import WalletConnection, { Signers, SupportedWallets, Wallets } from './WalletConnection';
 
 export interface Account {
     isConnected: boolean;
@@ -21,7 +22,7 @@ export interface Account {
 }
 
 interface WalletContextType {
-    connect: (walletType: SupportedWallets, signal?: AbortSignal) => Promise<void>;
+    connect: (wallet: SupportedWallets, signal?: AbortSignal) => Promise<void>;
     disconnect: () => void;
     walletType: SupportedWallets | null;
     walletWindowInstance: Wallets | null;
@@ -30,38 +31,79 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-const maxRetries = 10;
-const delayBetweenRetries = 2000;
+const MAX_RETRIES = 10;
+const RETRY_DELAY_MS = 2_000;
 
-export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+function useDocumentComplete(fn: () => void) {
+    const fired = useRef(false);
+
+    useEffect(() => {
+        if (fired.current) return;
+        const run = () => {
+            if (fired.current) return;
+            fired.current = true;
+            fn();
+        };
+
+        if (document.readyState === 'complete') {
+            run();
+            return;
+        }
+
+        const handler = () => {
+            if (document.readyState === 'complete') {
+                document.removeEventListener('readystatechange', handler);
+                run();
+            }
+        };
+        document.addEventListener('readystatechange', handler);
+        return () => document.removeEventListener('readystatechange', handler);
+    }, [fn]);
+}
+
+export const WalletProvider = ({ children }: { children: ReactNode }) => {
     const [walletConnection] = useState(() => new WalletConnection());
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
     const [walletWindowInstance, setWalletWindowInstance] = useState<Wallets | null>(null);
     const [account, setAccount] = useState<Account | null>(null);
 
-    const registeredEvents = useRef(false);
+    /** keeps the latest listeners so they can be removed in `disconnect` */
+    const listeners = useRef<{
+        disconnect?: () => void;
+        accountsChanged?: () => void;
+    }>({});
 
     const disconnect = useCallback(() => {
+        // detach previously attached listeners, if any
+        const inst = walletWindowInstance;
+        if (inst) {
+            if (listeners.current.disconnect) {
+                inst.removeListener?.('disconnect', listeners.current.disconnect);
+                listeners.current.disconnect = undefined;
+            }
+            if (listeners.current.accountsChanged) {
+                inst.removeListener?.('accountsChanged', listeners.current.accountsChanged);
+                listeners.current.accountsChanged = undefined;
+            }
+        }
+
         walletConnection.disconnect();
         setWalletType(null);
         setWalletWindowInstance(null);
         localStorage.removeItem('walletType');
         setAccount(null);
-        registeredEvents.current = false;
-    }, [walletConnection]);
+    }, [walletConnection, walletWindowInstance]);
 
     const connect = useCallback(
         async (type: SupportedWallets, signal?: AbortSignal) => {
-            let success = false;
             let attempt = 0;
 
-            while (attempt < maxRetries) {
-                // If the signal was already aborted, exit early
-                if (signal?.aborted) {
-                    console.debug('Connection aborted.');
-                    return;
-                }
+            const throwIfAborted = () => {
+                if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+            };
 
+            while (attempt < MAX_RETRIES) {
+                throwIfAborted();
                 try {
                     await walletConnection.connect(type);
 
@@ -72,60 +114,45 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     ) {
                         throw new Error('Wallet not fully loaded yet');
                     }
+                    break; // success
+                } catch (err) {
+                    attempt += 1;
+                    if (attempt >= MAX_RETRIES) {
+                        console.warn(`Failed to connect after ${MAX_RETRIES} attempts.`, err);
+                        disconnect();
+                        return;
+                    }
+                    console.warn(`Connection attempt ${attempt} failed:`, (err as Error).message);
 
-                    success = true;
-                    break;
-                } catch (error) {
-                    console.warn(
-                        `Connection attempt ${attempt + 1} failed:`,
-                        (error as Error).message,
-                    );
-                }
-
-                attempt++;
-                if (attempt < maxRetries) {
-                    // Wait before the next retry, unless aborted
                     try {
-                        await new Promise<void>((resolve, reject) => {
-                            const timer = setTimeout(() => resolve(), delayBetweenRetries);
-
-                            // If the signal is aborted during the timeout, reject so we jump out
+                        await new Promise<void>((res, rej) => {
+                            const t = setTimeout(res, RETRY_DELAY_MS);
                             signal?.addEventListener('abort', () => {
-                                clearTimeout(timer);
-                                reject(new DOMException('Aborted', 'AbortError'));
+                                clearTimeout(t);
+                                rej(new DOMException('Aborted', 'AbortError'));
                             });
                         });
                     } catch {
-                        // The abort event was triggered during the delay
                         console.debug('Connection aborted during retry delay.');
                         return;
                     }
                 }
             }
 
-            if (!success) {
-                console.warn(`Failed to connect after ${maxRetries} attempts.`);
-                disconnect();
-                return;
-            }
-
-            // If the signal was aborted right after a successful connect, bail
-            if (signal?.aborted) {
-                console.debug('Connection aborted after a success, cleaning up.');
-                disconnect();
-                return;
-            }
+            throwIfAborted();
 
             setWalletType(type);
             setWalletWindowInstance(walletConnection.walletWindowInstance);
             localStorage.setItem('walletType', type);
 
             try {
-                const signer = walletConnection.signer;
-                const address = await walletConnection.getAddress();
-                const addressTyped = await walletConnection.getAddressTyped();
-                const network = await walletConnection.getNetwork();
-                const provider = await walletConnection.getProvider();
+                const [signer, address, addressTyped, network, provider] = await Promise.all([
+                    walletConnection.signer,
+                    walletConnection.getAddress(),
+                    walletConnection.getAddressTyped(),
+                    walletConnection.getNetwork(),
+                    walletConnection.getProvider(),
+                ]);
 
                 setAccount({
                     isConnected: true,
@@ -136,74 +163,66 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     provider,
                 });
 
-                if (
-                    (walletConnection.walletType === SupportedWallets.OP_WALLET ||
-                        walletConnection.walletType === SupportedWallets.UNISAT) &&
-                    walletConnection.walletWindowInstance &&
-                    !registeredEvents.current
-                ) {
-                    const instance = walletConnection.walletWindowInstance;
-                    instance.on('disconnect', () => {
-                        disconnect();
-                    });
-
-                    instance.on('accountsChanged', async () => {
+                /* attach listeners exactly once per successful connect */
+                const instance = walletConnection.walletWindowInstance;
+                if (instance) {
+                    const onDisconnect = () => disconnect();
+                    const onAccountsChanged = async () => {
                         try {
-                            const updatedAddress = await walletConnection.getAddress();
-                            const updatedAddressTyped = await walletConnection.getAddressTyped();
-                            const updatedNetwork = await walletConnection.getNetwork();
-                            const updatedProvider = await walletConnection.getProvider();
+                            const [updatedAddr, updatedAddrTyped, updatedNet, updatedProv] =
+                                await Promise.all([
+                                    walletConnection.getAddress(),
+                                    walletConnection.getAddressTyped(),
+                                    walletConnection.getNetwork(),
+                                    walletConnection.getProvider(),
+                                ]);
 
                             setAccount((prev) =>
                                 prev
                                     ? {
-                                        ...prev,
-                                        address: updatedAddress,
-                                        addressTyped: updatedAddressTyped,
-                                        network: updatedNetwork,
-                                        provider: updatedProvider,
-                                    }
+                                          ...prev,
+                                          address: updatedAddr,
+                                          addressTyped: updatedAddrTyped,
+                                          network: updatedNet,
+                                          provider: updatedProv,
+                                      }
                                     : prev,
                             );
-                        } catch (err) {
+                        } catch {
                             disconnect();
-                            throw err;
                         }
-                    });
+                    };
 
-                    registeredEvents.current = true;
+                    /* store for later removal */
+                    listeners.current.disconnect = onDisconnect;
+                    listeners.current.accountsChanged = onAccountsChanged;
+
+                    instance.on('disconnect', onDisconnect);
+                    instance.on('accountsChanged', onAccountsChanged);
                 }
-            } catch (error) {
-                console.warn('Unable to finalize wallet connection:', error);
+            } catch (err) {
+                console.warn('Unable to finalize wallet connection:', err);
                 disconnect();
             }
         },
-        [disconnect, walletConnection],
+        [walletConnection, disconnect],
     );
 
-    // Reconnect if localStorage has a storedWalletType
-    useEffect(() => {
-        const storedWalletType = localStorage.getItem('walletType') as SupportedWallets | null;
-        if (!storedWalletType) return;
+    useDocumentComplete(() => {
+        const stored = localStorage.getItem('walletType') as SupportedWallets | null;
+        if (!stored) return;
 
         const controller = new AbortController();
-        void (async () => {
-            try {
-                await connect(storedWalletType, controller.signal);
-            } catch (error) {
-                // AbortError is normal if the component unmounted or re-rendered quickly
-                if ((error as DOMException).name !== 'AbortError') {
-                    console.warn('Failed to reconnect to wallet:', error);
-                }
+        connect(stored, controller.signal).catch((err: unknown) => {
+            if ((err as DOMException).name !== 'AbortError') {
+                console.warn('Failed to reconnect to wallet:', err);
             }
-        })();
+        });
 
-        return () => {
-            controller.abort();
-        };
-    }, [connect]);
+        return () => controller.abort();
+    });
 
-    const value = {
+    const ctx: WalletContextType = {
         connect,
         disconnect,
         walletType,
@@ -211,13 +230,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         account,
     };
 
-    return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
+    return <WalletContext.Provider value={ctx}>{children}</WalletContext.Provider>;
 };
 
 export const useWallet = (): WalletContextType => {
-    const context = useContext(WalletContext);
-    if (!context) {
-        throw new Error('useWallet must be used within a WalletProvider');
-    }
-    return context;
+    const ctx = useContext(WalletContext);
+    if (!ctx) throw new Error('useWallet must be used within a WalletProvider');
+    return ctx;
 };
