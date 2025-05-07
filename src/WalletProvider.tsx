@@ -1,10 +1,15 @@
-import {
-    createContext, useCallback, useContext, useEffect,
-    useRef, useState, ReactNode
-} from 'react';
 import { Network } from '@btc-vision/bitcoin';
 import { Address } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
+import {
+    createContext,
+    ReactNode,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import WalletConnection, { Signers, SupportedWallets, Wallets } from './WalletConnection';
 
 export interface Account {
@@ -25,7 +30,6 @@ interface WalletContextType {
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
-
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 2_000;
@@ -176,12 +180,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
                             setAccount((prev) =>
                                 prev
                                     ? {
-                                        ...prev,
-                                        address: updatedAddr,
-                                        addressTyped: updatedAddrTyped,
-                                        network: updatedNet,
-                                        provider: updatedProv,
-                                    }
+                                          ...prev,
+                                          address: updatedAddr,
+                                          addressTyped: updatedAddrTyped,
+                                          network: updatedNet,
+                                          provider: updatedProv,
+                                      }
                                     : prev,
                             );
                         } catch {
