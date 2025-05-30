@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.3.3",
+    "version": "1.3.4",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
@@ -90,7 +90,7 @@
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.4.0",
         "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.5.4",
+        "opnet": "^1.5.5",
         "webpack": "^5.99.9"
     }
 }
