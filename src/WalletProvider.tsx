@@ -78,16 +78,20 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const inst = walletWindowInstance;
         if (inst) {
             if (listeners.current.disconnect) {
+                // TODO: Make it working XVerse and other wallets
                 inst.removeListener?.('disconnect', listeners.current.disconnect);
                 listeners.current.disconnect = undefined;
             }
             if (listeners.current.accountsChanged) {
+                // TODO: Make it working XVerse and other wallets
                 inst.removeListener?.('accountsChanged', listeners.current.accountsChanged);
                 listeners.current.accountsChanged = undefined;
             }
         }
 
-        walletConnection.disconnect();
+        walletConnection.disconnect().catch((err: unknown) => {
+            console.warn('Error during wallet disconnect:', err);
+        });
         setWalletType(null);
         setWalletWindowInstance(null);
         localStorage.removeItem('walletType');
@@ -197,6 +201,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
                     listeners.current.disconnect = onDisconnect;
                     listeners.current.accountsChanged = onAccountsChanged;
 
+                    // TODO: Make it working XVerse and other wallets
                     instance.on('disconnect', onDisconnect);
                     instance.on('accountsChanged', onAccountsChanged);
                 }
