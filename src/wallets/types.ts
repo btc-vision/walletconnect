@@ -1,4 +1,5 @@
 import type { WalletConnectNetwork } from '../types.ts';
+import { SupportedWallets } from './index';
 
 export interface WalletBase {
     isInstalled(): boolean;
@@ -16,7 +17,7 @@ export interface WalletBase {
 }
 
 export interface WalletConnectWallet {
-    name: string;
+    name: SupportedWallets;
     icon: string;
     controller: WalletBase;
 }

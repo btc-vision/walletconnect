@@ -79,10 +79,27 @@
     background-image: linear-gradient(135deg, #131517 0%, rgba(30, 33, 36, 0.5) 100%);
     transition: background-color 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
 }
+.wallet-list > button:disabled{
+    opacity: 0.3;
+    cursor: not-allowed;
+}
 
 .wallet-list > button:hover{
     border:1px solid rgba(254, 121, 1, 0.3);
     background-color: rgba(254, 121, 1, 0.1);
+}
+.wallet-icon {
+    display: flex;
+}
+.wallet-icon img {
+    max-height: 32px;
+}
+.wallet-name {
+    font-size: x-large;
+}
+.wallet-not-installed {
+    padding: 10px;
+    font-size: medium;
 }
 
 .wallet-connect-error{

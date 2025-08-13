@@ -1,5 +1,5 @@
-export { WalletConnectContext } from './context/WalletConnectContext.ts';
-export { useWalletConnect } from './hooks/WalletConnectHook.tsx';
+export { WalletConnectContext } from './context/WalletConnectContext';
+export { useWalletConnect } from './hooks/WalletConnectHook';
 export * from './types';
 
-export { default as WalletConnectProvider } from './provider/WalletConnectProvider.tsx';
+export { default as WalletConnectProvider } from './provider/WalletConnectProvider';

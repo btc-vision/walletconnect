@@ -1,23 +1,23 @@
 import type { WalletBase } from '../types.ts';
-import type { OPWalletInterface } from './interface';
-import { UnisatChainInfo, UnisatNetwork } from '@btc-vision/transaction';
+import type { TestWalletInterface } from './interface.ts';
+import type { UnisatChainInfo } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 
-interface OPWalletWindow extends Window {
-    opnet?: OPWalletInterface;
+interface TestWalletWindow extends Window {
+    test?: TestWalletInterface;
 }
 
-const notInstalledError = 'OP_WALLET is not installed';
+const notInstalledError = 'TEST is not installed';
 
-class OPWallet implements WalletBase {
-    private walletBase: OPWalletWindow['opnet'];
+class TestWallet implements WalletBase {
+    private walletBase: TestWalletWindow['test'];
     private disconnectHookWrapper?: () => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
 
     private networkChangedHookWrapper?: (network: UnisatChainInfo) => void;
 
     isInstalled() {
-        this.walletBase = (window as unknown as OPWalletWindow).opnet;
+        this.walletBase = (window as unknown as TestWalletWindow).test;
         return !!this.walletBase;
     }
 
@@ -70,7 +70,6 @@ class OPWallet implements WalletBase {
         }
 
         this.disconnectHookWrapper = () => {
-            console.log('OPWallet Disconnecting Hook');
             fn();
         };
 
@@ -83,24 +82,21 @@ class OPWallet implements WalletBase {
         }
 
         if (this.disconnectHookWrapper) {
-            console.log('Removing disconnect hook for OPWallet');
             this.walletBase?.removeListener('disconnect', this.disconnectHookWrapper);
             this.disconnectHookWrapper = undefined;
         }
     }
 
     setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
-        console.log('Setting chain changed hook for OPWallet');
         if (!this.isInstalled()) {
             throw new Error(notInstalledError);
         }
 
         this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
-            console.log('OPWallet ChainChanged Hook', network as UnisatChainInfo);
             fn(network);
         };
 
-        this.walletBase?.on('chainChanged', this.chainChangedHookWrapper);
+        this.walletBase?.on('chainChanged', (e) => this.chainChangedHookWrapper?.(e));
     }
 
     removeChainChangedHook(): void {
@@ -109,24 +105,22 @@ class OPWallet implements WalletBase {
         }
 
         if (this.chainChangedHookWrapper) {
-            console.log('Removing chain changed hook for OPWallet');
             this.walletBase?.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
         }
     }
 
     setNetworkChangedHook(fn: (network: WalletConnectNetwork) => void): void {
-        console.log('Setting network changed hook for OPWallet');
         if (!this.isInstalled()) {
             throw new Error(notInstalledError);
         }
 
         this.networkChangedHookWrapper = (network: unknown) => {
-            console.log('OPWallet NetworkChanged Hook', network as number);
+            console.log('NetworkChanged', network);
             fn(network as WalletConnectNetwork);
         };
 
-        this.walletBase?.on('networkChanged', this.networkChangedHookWrapper);
+        this.walletBase?.on('networkChanged', (e) => this.networkChangedHookWrapper?.(e));
     }
 
     removeNetworkChangedHook(): void {
@@ -135,25 +129,10 @@ class OPWallet implements WalletBase {
         }
 
         if (this.networkChangedHookWrapper) {
-            console.log('Removing network changed hook for OPWallet');
             this.walletBase?.removeListener('networkChanged', this.networkChangedHookWrapper);
             this.networkChangedHookWrapper = undefined;
         }
     }
 }
 
-let count: number = 1;
-const idMap: WeakMap<Record<string, unknown> | Array<unknown | unknown[]>, number> = new WeakMap<Record<string, unknown> | Array<unknown>, number>();
-function getObjectId(object: Record<string, unknown> | Array<unknown> | unknown[]): number {
-    const objectId: number | undefined = idMap.get(object);
-    if (objectId === undefined) {
-        count += 1;
-        idMap.set(object, count);
-
-        return count;
-    }
-
-    return objectId;
-}
-
-export default OPWallet;
+export default TestWallet;

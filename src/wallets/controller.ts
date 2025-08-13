@@ -4,7 +4,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet
 } from './types.ts';
-import { _e } from '../utils/accessibility/errorDecoder.ts';
+import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
 
 class WalletController {
@@ -57,7 +57,7 @@ class WalletController {
             return {
                 code: 499,
                 data: {
-                    message: _e(error as string)
+                    message: _e((error as Error)?.message || error as string)
                 }
             };
         }
@@ -69,6 +69,7 @@ class WalletController {
             throw new Error('Not connected to any wallet');
         }
         await wallet.controller.disconnect();
+        this.currentWallet = null;
     }
 
     static setDisconnectHook(fn: () => void): void {
@@ -77,6 +78,7 @@ class WalletController {
             return;
         }
         try {
+            wallet.controller.removeDisconnectHook();
             wallet.controller.setDisconnectHook(fn);
         } catch (error) {
             console.error('Error setting disconnect hook:', error);
@@ -90,6 +92,7 @@ class WalletController {
             return;
         }
         try {
+            wallet.controller.removeNetworkChangedHook()
             wallet.controller.setNetworkChangedHook(fn);
         } catch (error) {
             console.error('Error setting network switch hook:', error);
@@ -103,6 +106,7 @@ class WalletController {
             return;
         }
         try {
+            wallet.controller.removeChainChangedHook()
             wallet.controller.setChainChangedHook(fn);
         } catch (error) {
             console.error('Error setting network switch hook:', error);
