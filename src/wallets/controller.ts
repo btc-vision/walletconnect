@@ -70,8 +70,9 @@ class WalletController {
         }
     }
 
-    static async disconnectIfWalletChanged(wallet: WalletConnectWallet) {
-        if (this.currentWallet && this.currentWallet.name != wallet.name) {
+    static async disconnectIfWalletChanged(newWallet: WalletConnectWallet) {
+        const wallet = this.currentWallet;
+        if (wallet && wallet.name != newWallet.name) {
             await this.disconnect();
             this.unbindHooks();
         }

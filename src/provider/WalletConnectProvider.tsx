@@ -53,17 +53,21 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     };
 
     const disconnect = useCallback(async () => {
-        console.log("DISCONNECTING FROM WALLET")
-        setSelectedWallet(null);
-        setWalletAddress(null);
-        setPublicKey(null);
-        setNetwork(DefaultWalletConnectChain);
-        setConnecting(false);
-        localStorage.removeItem('WC_SelectedWallet');
-        WalletController.removeDisconnectHook();
-        WalletController.removeChainChangedHook();
-        WalletController.removeAccountsChangedHook();
-        await WalletController.disconnect();
+        try {
+            console.log("DISCONNECTING FROM WALLET")
+            setSelectedWallet(null);
+            setWalletAddress(null);
+            setPublicKey(null);
+            setNetwork(DefaultWalletConnectChain);
+            setConnecting(false);
+            localStorage.removeItem('WC_SelectedWallet');
+            WalletController.removeDisconnectHook();
+            WalletController.removeChainChangedHook();
+            WalletController.removeAccountsChangedHook();
+            await WalletController.disconnect();
+        } catch (e) {
+            console.log((e as Error)?.message || e);
+        }
     }, []);
 
     const connectToWallet = useCallback(
