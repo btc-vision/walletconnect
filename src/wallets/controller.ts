@@ -6,10 +6,16 @@ import type {
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
+import { UnisatChainInfo } from '@btc-vision/transaction';
+import { SupportedWallets } from './index';
 
 class WalletController {
     private static wallets: WalletConnectWallet[] = [];
     private static currentWallet: WalletConnectWallet | null = null;
+
+    static getCurrentWalletName(): SupportedWallets | null {
+        return this.currentWallet?.name ?? null;
+    }
 
     static getWallets(): WalletConnectWallet[] {
         if (!this.wallets || this.wallets.length === 0) {
@@ -26,10 +32,10 @@ class WalletController {
         return wallet.controller.getNetwork();
     }
 
-    static async getPublicKey(): Promise<string | undefined> {
+    static async getPublicKey(): Promise<string | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
-            return;
+            return null;
         }
         return wallet.controller.getPublicKey();
     }
@@ -48,6 +54,7 @@ class WalletController {
         }
         try {
             const accounts = await wallet.controller.connect();
+            await this.disconnectIfWalletChanged(wallet);
             this.currentWallet = wallet;
             return {
                 code: 200,
@@ -63,6 +70,13 @@ class WalletController {
         }
     }
 
+    static async disconnectIfWalletChanged(wallet: WalletConnectWallet) {
+        if (this.currentWallet && this.currentWallet.name != wallet.name) {
+            await this.disconnect();
+            this.unbindHooks();
+        }
+    }
+
     static async disconnect(): Promise<void> {
         const wallet = this.currentWallet;
         if (!wallet) {
@@ -70,6 +84,19 @@ class WalletController {
         }
         await wallet.controller.disconnect();
         this.currentWallet = null;
+    }
+
+    static setAccountsChangedHook(fn: (accounts: string[]) => void): void {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return;
+        }
+        try {
+            wallet.controller.removeAccountsChangedHook();
+            wallet.controller.setAccountsChangedHook(fn);
+        } catch (error) {
+            console.error('Error setting accounts changed hook:', error);
+        }
     }
 
     static setDisconnectHook(fn: () => void): void {
@@ -85,21 +112,7 @@ class WalletController {
         }
     }
 
-    static setNetworkChangeHook(fn: (network: WalletConnectNetwork) => void): void {
-        const wallet = this.currentWallet;
-        if (!wallet) {
-            console.log('No current wallet to set network switch hook for');
-            return;
-        }
-        try {
-            wallet.controller.removeNetworkChangedHook()
-            wallet.controller.setNetworkChangedHook(fn);
-        } catch (error) {
-            console.error('Error setting network switch hook:', error);
-        }
-    }
-
-    static setChainChangedHook(fn: (chain: unknown) => void): void {
+    static setChainChangedHook(fn: (chain: UnisatChainInfo) => void): void {
         const wallet = this.currentWallet;
         if (!wallet) {
             console.log('No current wallet to set network switch hook for');
@@ -110,6 +123,19 @@ class WalletController {
             wallet.controller.setChainChangedHook(fn);
         } catch (error) {
             console.error('Error setting network switch hook:', error);
+        }
+    }
+
+    static removeAccountsChangedHook(): void {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            console.log('No current wallet to remove accounts changed hook from');
+            return;
+        }
+        try {
+            wallet.controller.removeAccountsChangedHook();
+        } catch (error) {
+            console.error('Error removing accounts changed hook:', error);
         }
     }
 
@@ -139,19 +165,6 @@ class WalletController {
         }
     }
 
-    static removeNetworkChangeHook(): void {
-        const wallet = this.currentWallet;
-        if (!wallet) {
-            console.log('No current wallet to remove network change hook from');
-            return;
-        }
-        try {
-            wallet.controller.removeNetworkChangedHook();
-        } catch (error) {
-            console.error('Error removing network change hook:', error);
-        }
-    }
-
     static registerWallet(wallet: WalletConnectWallet): void {
         if (!this.wallets) {
             this.wallets = [];
@@ -164,7 +177,7 @@ class WalletController {
     static unbindHooks(): void {
         this.removeDisconnectHook();
         this.removeChainChangedHook();
-        this.removeNetworkChangeHook();
+        this.removeAccountsChangedHook();
     }
 }
 

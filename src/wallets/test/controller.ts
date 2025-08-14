@@ -11,15 +11,18 @@ const notInstalledError = 'TEST is not installed';
 
 class TestWallet implements WalletBase {
     private walletBase: TestWalletWindow['test'];
+    private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
     private disconnectHookWrapper?: () => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
-
-    private networkChangedHookWrapper?: (network: UnisatChainInfo) => void;
 
     isInstalled() {
         this.walletBase = (window as unknown as TestWalletWindow).test;
         return !!this.walletBase;
     }
+    isConnected() {
+        return false;
+    }
+
 
     getChainId(): void {
         throw new Error('Method not implemented.');
@@ -39,11 +42,11 @@ class TestWallet implements WalletBase {
         return await this.walletBase?.disconnect();
     }
 
-    getPublicKey(): Promise<string> | undefined {
-        if (!this.isInstalled()) {
+    getPublicKey(): Promise<string> {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return this.walletBase?.getPublicKey();
+        return this.walletBase.getPublicKey();
     }
 
     async getNetwork(): Promise<WalletConnectNetwork> {
@@ -60,6 +63,33 @@ class TestWallet implements WalletBase {
             network: chainInfo.network,
             chainType: chainInfo.enum
         };
+    }
+
+    setAccountsChangedHook(fn: (accounts: string[]) => void): void {
+        console.log('Setting account changed hook for OPWallet');
+
+        if (!this.isInstalled()) {
+            throw new Error(notInstalledError);
+        }
+
+        this.accountsChangedHookWrapper = (accounts: string[]) => {
+            console.log('OPWallet Account Changed Hook', accounts);
+            fn(accounts);
+        };
+
+        this.walletBase?.on('accountsChanged', this.accountsChangedHookWrapper);
+    }
+
+    removeAccountsChangedHook(): void {
+        if (!this.isInstalled()) {
+            throw new Error(notInstalledError);
+        }
+
+        if (this.accountsChangedHookWrapper) {
+            console.log('Removing account changed hook for OPWallet');
+            this.walletBase?.removeListener('accountsChanged', this.accountsChangedHookWrapper);
+            this.accountsChangedHookWrapper = undefined;
+        }
     }
 
     setDisconnectHook(fn: () => void): void {
@@ -107,30 +137,6 @@ class TestWallet implements WalletBase {
         if (this.chainChangedHookWrapper) {
             this.walletBase?.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
-        }
-    }
-
-    setNetworkChangedHook(fn: (network: WalletConnectNetwork) => void): void {
-        if (!this.isInstalled()) {
-            throw new Error(notInstalledError);
-        }
-
-        this.networkChangedHookWrapper = (network: unknown) => {
-            console.log('NetworkChanged', network);
-            fn(network as WalletConnectNetwork);
-        };
-
-        this.walletBase?.on('networkChanged', (e) => this.networkChangedHookWrapper?.(e));
-    }
-
-    removeNetworkChangedHook(): void {
-        if (!this.isInstalled()) {
-            throw new Error(notInstalledError);
-        }
-
-        if (this.networkChangedHookWrapper) {
-            this.walletBase?.removeListener('networkChanged', this.networkChangedHookWrapper);
-            this.networkChangedHookWrapper = undefined;
         }
     }
 }

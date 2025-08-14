@@ -10,6 +10,7 @@ import type {
 import '../utils/style.css';
 import type { WalletConnectNetwork } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
+import { UnisatChainInfo } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -27,7 +28,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
-    const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
+    const [publicKey, setPublicKey] = useState<string | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -53,15 +54,15 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const disconnect = useCallback(async () => {
         console.log("DISCONNECTING FROM WALLET")
-        setWalletAddress(null);
-        setPublicKey(undefined);
         setSelectedWallet(null);
+        setWalletAddress(null);
+        setPublicKey(null);
         setNetwork(DefaultWalletConnectChain);
         setConnecting(false);
         localStorage.removeItem('WC_SelectedWallet');
         WalletController.removeDisconnectHook();
-        WalletController.removeNetworkChangeHook();
         WalletController.removeChainChangedHook();
+        WalletController.removeAccountsChangedHook();
         await WalletController.disconnect();
     }, []);
 
@@ -81,9 +82,10 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                     setPublicKey(publicKey);
                     const network = await WalletController.getNetwork();
                     setNetwork(network);
+
+                    WalletController.setAccountsChangedHook(accountsChanged)
+                    WalletController.setChainChangedHook(chainChanged);
                     WalletController.setDisconnectHook(disconnect);
-                    WalletController.setNetworkChangeHook(changeNetwork);
-                    WalletController.setChainChangedHook(changeChain);
 
                     closeConnectModal();
                     setSelectedWallet(wallet);
@@ -100,12 +102,12 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 setConnecting(false);
             }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [disconnect]
     );
 
     const attemptReconnect = useCallback(async () => {
-        if (!selectedWallet) return;
+        console.warn('Trying to reconnect...', selectedWallet, connecting, availableWallets);
+        if (!selectedWallet || !availableWallets || connecting) return;
         let attempts = 0;
 
         const reconnect = async () => {
@@ -138,25 +140,32 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         void attemptReconnect();
     }, [attemptReconnect]);
 
-    const changeNetwork = useCallback(
-        (network: WalletConnectNetwork): void => {
+    const accountsChanged = useCallback(
+        async (accounts:string[])=> {
+            console.log("Accounts", accounts)
             if (selectedWallet) {
-                setNetwork(network);
-                void connectToWallet(selectedWallet);
-            }
-        },
-        [connectToWallet, selectedWallet]
-    );
-
-    const changeChain = useCallback(
-        (network: unknown): void => {
-            if (selectedWallet) {
-                console.log("Change chain", network);
-                //setNetwork(network);
+                const account = accounts.length > 0 ? accounts[0] : null;
+                setWalletAddress(account)
+                if (account !== null) {
+                    const publicKey = await WalletController.getPublicKey();
+                    setPublicKey(publicKey);
+                }
                 //void connectToWallet(selectedWallet);
             }
-        },
-        [connectToWallet, selectedWallet]
+        }, [selectedWallet]
+    );
+
+    const chainChanged = useCallback(
+        (chainInfo: UnisatChainInfo): void => {
+            if (selectedWallet) {
+                const network: WalletConnectNetwork = {
+                    chainType: chainInfo.enum,
+                    network: chainInfo.network,
+                }
+                setNetwork(network);
+                //void connectToWallet(selectedWallet);
+            }
+        }, [connectToWallet, selectedWallet]
     );
 
     return (
@@ -206,8 +215,8 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                                         className="wallet-button">
                                         {wallet.icon
                                         ?
-                                            <div className="wallet-icon">
-                                                <img src={wallet.icon} />
+                                            <div className="wallet-icon" title={wallet.name}>
+                                                <img src={wallet.icon} alt={wallet.name} />
                                             </div>
                                         :
                                             <div className="wallet-name">
@@ -215,6 +224,10 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                                             </div>
                                         }
 
+                                        {wallet.controller.isConnected()
+                                            ? (<div className="wallet-connected">(Connected)</div>)
+                                            : (<></>)
+                                        }
                                         {wallet.controller.isInstalled()
                                             ? (<></>)
                                             : (<div className="wallet-not-installed">(Not Installed)</div>)

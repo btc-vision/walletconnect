@@ -1,6 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
-import type { UnisatChainInfo } from '@btc-vision/transaction';
+import { UnisatChainInfo } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 
 interface UnisatWalletWindow extends Window {
@@ -9,15 +9,19 @@ interface UnisatWalletWindow extends Window {
 
 const notInstalledError = 'UNISAT is not installed';
 
-class UniSatWallet implements WalletBase {
+class UnisatWallet implements WalletBase {
     private walletBase: UnisatWalletWindow['unisat'];
+    private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
     private disconnectHookWrapper?: () => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
-    private networkChangedHookWrapper?: (network: UnisatChainInfo) => void;
+    private _isConnected: boolean = false;
 
     isInstalled() {
         this.walletBase = (window as unknown as UnisatWalletWindow).unisat;
         return !!this.walletBase;
+    }
+    isConnected() {
+        return !!this.walletBase && this._isConnected;
     }
 
     getChainId(): void {
@@ -25,32 +29,37 @@ class UniSatWallet implements WalletBase {
     }
 
     async connect(): Promise<string[]> {
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return this.walletBase?.requestAccounts() || [];
+        return this.walletBase.requestAccounts().then((accounts: string[]) => {
+            this._isConnected = accounts.length > 0
+            return accounts
+        });
     }
 
     async disconnect() {
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return await this.walletBase?.disconnect();
+        return this._isConnected ? await this.walletBase.disconnect().then(() => {
+            this._isConnected = false;
+        }) : undefined;
     }
 
-    getPublicKey(): Promise<string> | undefined {
-        if (!this.isInstalled()) {
+    getPublicKey(): Promise<string> {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return this.walletBase?.getPublicKey();
+        return this.walletBase.getPublicKey();
     }
 
     async getNetwork(): Promise<WalletConnectNetwork> {
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        const chainInfo = await this.walletBase?.getChain();
 
+        const chainInfo = await this.walletBase.getChain();
         if (!chainInfo) {
             throw new Error('Failed to retrieve chain information');
         }
@@ -61,84 +70,91 @@ class UniSatWallet implements WalletBase {
         };
     }
 
+    setAccountsChangedHook(fn: (accounts: string[]) => void): void {
+        console.log('Setting account changed hook for Unisat');
+
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+
+        this.accountsChangedHookWrapper = (accounts: string[]) => {
+            console.log('Unisat Account Changed Hook', accounts, accounts.length);
+            fn(accounts);
+
+            this._isConnected = accounts.length > 0;
+            if (accounts.length === 0) {
+                console.log('Unisat Account Changed Hook --> Disconnect', accounts.length, !!this.disconnectHookWrapper);
+                this.disconnectHookWrapper?.()
+            }
+        };
+
+        this.walletBase.on('accountsChanged', this.accountsChangedHookWrapper);
+    }
+
+    removeAccountsChangedHook(): void {
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+
+        if (this.accountsChangedHookWrapper) {
+            console.log('Removing account changed hook for Unisat');
+            this.walletBase.removeListener('accountsChanged', this.accountsChangedHookWrapper);
+            this.accountsChangedHookWrapper = undefined;
+        }
+    }
+
     setDisconnectHook(fn: () => void): void {
         console.log('Setting disconnect hook for Unisat');
 
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
         this.disconnectHookWrapper = () => {
-            console.log('Unisat Disconnected Hook');
+            console.log('Unisat Disconnecting Hook');
             fn();
         };
 
-        this.walletBase?.on('disconnect', this.disconnectHookWrapper);
+        this.walletBase.on('disconnect', this.disconnectHookWrapper);
     }
 
     removeDisconnectHook(): void {
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
         if (this.disconnectHookWrapper) {
             console.log('Removing disconnect hook for Unisat');
-            this.walletBase?.removeListener('disconnect', this.disconnectHookWrapper);
+            this.walletBase.removeListener('disconnect', this.disconnectHookWrapper);
             this.disconnectHookWrapper = undefined;
         }
     }
 
     setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
         console.log('Setting chain changed hook for Unisat');
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
         this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
-            console.log('Unisat ChainChanged Hook', network as UnisatChainInfo);
+            console.log('Unisat ChainChanged Hook', network);
             fn(network);
         };
 
-        this.walletBase?.on('chainChanged', this.chainChangedHookWrapper);
+        this.walletBase.on('chainChanged', this.chainChangedHookWrapper);
     }
 
     removeChainChangedHook(): void {
-        if (!this.isInstalled()) {
+        if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
         if (this.chainChangedHookWrapper) {
             console.log('Removing chain changed hook for Unisat');
-            this.walletBase?.removeListener('chainChanged', this.chainChangedHookWrapper);
+            this.walletBase.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
-        }
-    }
-
-    setNetworkChangedHook(fn: (network: WalletConnectNetwork) => void): void {
-        console.log('Setting network changed hook for Unisat');
-        if (!this.isInstalled()) {
-            throw new Error(notInstalledError);
-        }
-
-        this.networkChangedHookWrapper = (network: UnisatChainInfo) => {
-            console.log('Unisat NetworkChanged Hook', network);
-            fn(network as unknown as WalletConnectNetwork);
-        };
-
-        this.walletBase?.on('networkChanged', this.networkChangedHookWrapper);
-    }
-
-    removeNetworkChangedHook(): void {
-        if (!this.isInstalled()) {
-            throw new Error(notInstalledError);
-        }
-
-        if (this.networkChangedHookWrapper) {
-            console.log('Removing network changed hook for Unisat');
-            this.walletBase?.removeListener('networkChanged', this.networkChangedHookWrapper);
-            this.networkChangedHookWrapper = undefined;
         }
     }
 }
 
-export default UniSatWallet;
+export default UnisatWallet;

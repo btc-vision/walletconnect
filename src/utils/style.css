@@ -97,6 +97,11 @@
 .wallet-name {
     font-size: x-large;
 }
+.wallet-connected {
+    padding: 10px;
+    font-size: medium;
+    color: green;
+}
 .wallet-not-installed {
     padding: 10px;
     font-size: medium;
