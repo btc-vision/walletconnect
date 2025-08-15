@@ -79,11 +79,12 @@ class UnisatWallet implements WalletBase {
 
         this.accountsChangedHookWrapper = (accounts: string[]) => {
             console.log('Unisat Account Changed Hook', accounts, accounts.length);
-            fn(accounts);
 
-            this._isConnected = accounts.length > 0;
-            if (accounts.length === 0) {
+            if (accounts.length > 0) {
+                fn(accounts);
+            } else {
                 console.log('Unisat Account Changed Hook --> Disconnect', accounts.length, !!this.disconnectHookWrapper);
+                this._isConnected = false;
                 this.disconnectHookWrapper?.()
             }
         };

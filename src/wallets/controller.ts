@@ -7,21 +7,16 @@ import type {
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
 import { UnisatChainInfo } from '@btc-vision/transaction';
-import { SupportedWallets } from './index';
 
 class WalletController {
-    private static wallets: WalletConnectWallet[] = [];
+    private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
-    static getCurrentWalletName(): SupportedWallets | null {
-        return this.currentWallet?.name ?? null;
+    static getWallets = () => {
+        return WalletController.wallets.values().toArray();
     }
-
-    static getWallets(): WalletConnectWallet[] {
-        if (!this.wallets || this.wallets.length === 0) {
-            return [];
-        }
-        return this.wallets;
+    static isWalletInstalled(wallet: string): boolean {
+        return this.wallets.get(wallet)?.controller?.isInstalled() || false;
     }
 
     static getNetwork(): Promise<WalletConnectNetwork> {
@@ -43,7 +38,7 @@ class WalletController {
     static async connect(
         walletName: string
     ): Promise<ControllerResponse<ControllerConnectAccounts | ControllerErrorResponse>> {
-        const wallet = this.wallets.find((w) => w.name === walletName);
+        const wallet = this.wallets.get(walletName);
         if (!wallet) {
             return {
                 code: 404,
@@ -81,7 +76,7 @@ class WalletController {
     static async disconnect(): Promise<void> {
         const wallet = this.currentWallet;
         if (!wallet) {
-            throw new Error('Not connected to any wallet');
+            return;
         }
         await wallet.controller.disconnect();
         this.currentWallet = null;
@@ -166,13 +161,8 @@ class WalletController {
         }
     }
 
-    static registerWallet(wallet: WalletConnectWallet): void {
-        if (!this.wallets) {
-            this.wallets = [];
-        }
-        if (!this.wallets.some((w) => w.name === wallet.name)) {
-            this.wallets.push(wallet);
-        }
+    static registerWallet = (wallet: WalletConnectWallet): void => {
+        this.wallets.set(wallet.name, wallet);
     }
 
     static unbindHooks(): void {

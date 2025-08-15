@@ -1,8 +1,9 @@
 import { createContext } from 'react';
-import type { WalletConnectNetwork } from '../types.ts';
+import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { SupportedWallets } from '../wallets';
 
 export type WalletConnectContextType = {
+    allWallets: WalletInformation[];
     network: WalletConnectNetwork;
     walletAddress: string | null;
     publicKey: string | null;

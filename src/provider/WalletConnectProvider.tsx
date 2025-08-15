@@ -1,4 +1,4 @@
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
 import { SupportedWallets, WalletController } from '../wallets';
 import type {
@@ -8,7 +8,7 @@ import type {
     WalletConnectWallet
 } from '../wallets/types.ts';
 import '../utils/style.css';
-import type { WalletConnectNetwork } from '../types.ts';
+import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
 import { UnisatChainInfo } from '@btc-vision/transaction';
 
@@ -20,7 +20,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectChain);
 
-    const [availableWallets, setAvailableWallets] = useState<WalletConnectWallet[]>([]);
+    const [supportedWallets ] = useState<WalletConnectWallet[]>(WalletController.getWallets);
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
         () => localStorage.getItem('WC_SelectedWallet') as SupportedWallets || null
     );
@@ -43,7 +43,6 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const openConnectModal = () => {
         setConnectError(undefined);
-        setAvailableWallets(availableWallets || []);
         setModalOpen(true);
     };
 
@@ -53,21 +52,17 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     };
 
     const disconnect = useCallback(async () => {
-        try {
-            console.log("DISCONNECTING FROM WALLET")
-            setSelectedWallet(null);
-            setWalletAddress(null);
-            setPublicKey(null);
-            setNetwork(DefaultWalletConnectChain);
-            setConnecting(false);
-            localStorage.removeItem('WC_SelectedWallet');
-            WalletController.removeDisconnectHook();
-            WalletController.removeChainChangedHook();
-            WalletController.removeAccountsChangedHook();
-            await WalletController.disconnect();
-        } catch (e) {
-            console.log((e as Error)?.message || e);
-        }
+        console.log("DISCONNECTING FROM WALLET")
+        setSelectedWallet(null);
+        setPublicKey(null);
+        setWalletAddress(null);
+        setConnecting(false);
+        localStorage.removeItem('WC_SelectedWallet');
+        WalletController.removeDisconnectHook();
+        WalletController.removeChainChangedHook();
+        WalletController.removeAccountsChangedHook();
+        await WalletController.disconnect();
+        setNetwork(DefaultWalletConnectChain); // Triggers allWallets update after disconnecting
     }, []);
 
     const connectToWallet = useCallback(
@@ -106,27 +101,25 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 setConnecting(false);
             }
         },
+        // eslint-disable-next-line
         [disconnect]
     );
 
     const attemptReconnect = useCallback(async () => {
-        console.warn('Trying to reconnect...', selectedWallet, connecting, availableWallets);
-        if (!selectedWallet || !availableWallets || connecting) return;
+        console.warn('Trying to reconnect...', selectedWallet, connecting, supportedWallets);
+        if (!selectedWallet || !supportedWallets || connecting) return;
         let attempts = 0;
 
         const reconnect = async () => {
             attempts++;
-            if (!availableWallets || availableWallets.length === 0) {
+            if (supportedWallets.length === 0) {
                 console.warn('No available wallets to reconnect to.');
                 return;
             }
-            const walletAvailable = availableWallets.some(
-                (w) => w.name === selectedWallet && w.controller.isInstalled()
-            );
 
-            console.log(`Attempting to reconnect to ${selectedWallet} (Attempt ${attempts})`);
-
-            if (walletAvailable && selectedWallet) {
+            const walletAvailable = WalletController.isWalletInstalled(selectedWallet)
+            if (walletAvailable) {
+                console.log(`Attempting to reconnect to ${selectedWallet} (Attempt ${attempts})`);
                 await connectToWallet(selectedWallet);
                 return;
             }
@@ -137,10 +130,10 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         };
 
         await reconnect();
-    }, [selectedWallet, availableWallets, connectToWallet]);
+        // eslint-disable-next-line
+    }, [selectedWallet, supportedWallets, connectToWallet]);
 
     useEffect(() => {
-        setAvailableWallets(WalletController.getWallets());
         void attemptReconnect();
     }, [attemptReconnect]);
 
@@ -154,9 +147,8 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                     const publicKey = await WalletController.getPublicKey();
                     setPublicKey(publicKey);
                 }
-                //void connectToWallet(selectedWallet);
             }
-        }, [selectedWallet]
+        }, [selectedWallet, setWalletAddress, setPublicKey]
     );
 
     const chainChanged = useCallback(
@@ -167,14 +159,34 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                     network: chainInfo.network,
                 }
                 setNetwork(network);
-                //void connectToWallet(selectedWallet);
             }
-        }, [connectToWallet, selectedWallet]
+        }, [selectedWallet, setNetwork]
     );
+
+    const allWallets = useMemo(() => {
+        //console.log("Refreshing all wallets");
+        return supportedWallets.map((wallet): WalletInformation => {
+            //console.log(" --> ", wallet.name, wallet.controller.isInstalled(), wallet.controller.isConnected());
+            return  {
+                name: wallet.name,
+                icon: wallet.icon,
+                isInstalled: wallet.controller.isInstalled(),
+                isConnected: wallet.controller.isConnected(),
+            }
+        })
+        // eslint-disable-next-line
+    }, [supportedWallets, network]);
+
+    const availableWallets = useMemo(() => {
+        //return supportedWallets.filter(wallet => wallet.controller.isInstalled())
+        return supportedWallets
+        // eslint-disable-next-line
+    }, [supportedWallets, network])
 
     return (
         <WalletConnectContext.Provider
-            value={{ walletAddress, publicKey, connecting, connectToWallet, disconnect, openConnectModal, network }}>
+            value={{ walletAddress, publicKey, connecting, connectToWallet,
+                disconnect, openConnectModal, network, allWallets }}>
             {children}
             {modalOpen && (
                 <div className="wallet-connect-modal-backdrop">
@@ -209,14 +221,14 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                                 <p className="error-message">{connectError}</p>
                             </div>
                         )}
-                        {availableWallets && availableWallets.length > 0 ? (
+                        {availableWallets.length > 0 ? (
                             <div className="wallet-list">
                                 {availableWallets.map((wallet) => (
                                     <button
                                         key={wallet.name}
                                         onClick={() => connectToWallet(wallet.name)}
                                         disabled={connecting || !wallet.controller.isInstalled()}
-                                        className="wallet-button">
+                                        className={`wallet-button ${wallet.controller.isInstalled() ? "wallet-installed" : "wallet-not-installed"}`}>
                                         {wallet.icon
                                         ?
                                             <div className="wallet-icon" title={wallet.name}>

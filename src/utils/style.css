@@ -102,7 +102,7 @@
     font-size: medium;
     color: green;
 }
-.wallet-not-installed {
+div.wallet-not-installed {
     padding: 10px;
     font-size: medium;
 }

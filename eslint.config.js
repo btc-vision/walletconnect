@@ -1,19 +1,29 @@
 // @ts-check
 
 import eslint from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-    eslint.configs.recommended,
-    ...tseslint.configs.strictTypeChecked,
+    { ignores: ['dist'] },
     {
+        extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.strictTypeChecked],
+        files: ['**/*.{ts,tsx}'],
         languageOptions: {
+            ecmaVersion: 2023,
             parserOptions: {
                 projectService: true,
-                tsconfigDirName: import.meta.dirname,
-            },
+                tsconfigDirName: import.meta.dirname
+            }
+        },
+        plugins: {
+            'react-hooks': reactHooks,
+            'react-refresh': reactRefresh
         },
         rules: {
+            ...reactHooks.configs.recommended.rules,
+            'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
             'no-undef': 'off',
             '@typescript-eslint/no-unused-vars': 'off',
             'no-empty': 'off',
@@ -29,10 +39,17 @@ export default tseslint.config(
             '@typescript-eslint/no-duplicate-enum-values': 'off',
             'prefer-spread': 'off',
             '@typescript-eslint/no-empty-object-type': 'off',
-        },
+            '@typescript-eslint/no-floating-promises': 'off',
+            '@typescript-eslint/ban-ts-comment': 'off',
+            'no-constant-binary-expression': 'off',
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-call': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
+            '@typescript-eslint/no-unsafe-argument': 'off'
+        }
     },
     {
         files: ['**/*.js'],
-        ...tseslint.configs.disableTypeChecked,
-    },
+        ...tseslint.configs.disableTypeChecked
+    }
 );

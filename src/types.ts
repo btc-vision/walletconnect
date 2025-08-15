@@ -3,6 +3,13 @@ export interface WalletConnectNetwork {
     chainType: string;
 }
 
+export interface WalletInformation {
+    name: string;
+    icon: string;
+    isInstalled: boolean;
+    isConnected: boolean;
+}
+
 export interface WalletConnectChainMap {
     [key: string]: string;
 }
