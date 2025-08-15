@@ -10,7 +10,7 @@ import type {
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
-import { UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -29,6 +29,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
+    const [provider, setProvider] = useState<Unisat | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -53,11 +54,11 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const disconnect = useCallback(async () => {
         console.log("DISCONNECTING FROM WALLET")
+        localStorage.removeItem('WC_SelectedWallet');
         setSelectedWallet(null);
         setPublicKey(null);
         setWalletAddress(null);
         setConnecting(false);
-        localStorage.removeItem('WC_SelectedWallet');
         WalletController.removeDisconnectHook();
         WalletController.removeChainChangedHook();
         WalletController.removeAccountsChangedHook();
@@ -178,15 +179,22 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }, [supportedWallets, network]);
 
     const availableWallets = useMemo(() => {
-        //return supportedWallets.filter(wallet => wallet.controller.isInstalled())
-        return supportedWallets
+        return supportedWallets.filter(wallet => wallet.controller.isInstalled())
+        //return supportedWallets
         // eslint-disable-next-line
     }, [supportedWallets, network])
+
+    useEffect(() => {
+        const provider = walletAddress ? WalletController.getProvider() : null;
+        console.log("Updating provider", provider != null, walletAddress)
+        setProvider(provider)
+    }, [walletAddress]);
 
     return (
         <WalletConnectContext.Provider
             value={{ walletAddress, publicKey, connecting, connectToWallet,
-                disconnect, openConnectModal, network, allWallets }}>
+                disconnect, openConnectModal, network, allWallets,
+                provider }}>
             {children}
             {modalOpen && (
                 <div className="wallet-connect-modal-backdrop">
@@ -252,7 +260,26 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                                 ))}
                             </div>
                         ) : (
-                            <p>No wallets available</p>
+                            <div>
+                                <p>No wallets available</p>
+                                <p>Supporting the following wallets</p>
+                                <div className="wallet-list">
+                                    {supportedWallets.map((wallet) => (
+                                        <a href={`https://chromewebstore.google.com/search/${wallet.name}`}>
+                                            {wallet.icon
+                                                ?
+                                                <div className="wallet-icon" title={wallet.name}>
+                                                    <img src={wallet.icon} alt={wallet.name} />
+                                                </div>
+                                                :
+                                                <div className="wallet-name">
+                                                    {wallet.name}
+                                                </div>
+                                            }
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

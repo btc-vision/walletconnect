@@ -1,6 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
-import { UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 
 interface UnisatWalletWindow extends Window {
@@ -12,8 +12,8 @@ const notInstalledError = 'UNISAT is not installed';
 class UnisatWallet implements WalletBase {
     private walletBase: UnisatWalletWindow['unisat'];
     private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
-    private disconnectHookWrapper?: () => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
+    private disconnectHookWrapper?: () => void;
     private _isConnected: boolean = false;
 
     isInstalled() {
@@ -22,6 +22,10 @@ class UnisatWallet implements WalletBase {
     }
     isConnected() {
         return !!this.walletBase && this._isConnected;
+    }
+
+    getProvider(): Unisat | null {
+        return this._isConnected && this.walletBase || null;
     }
 
     getChainId(): void {

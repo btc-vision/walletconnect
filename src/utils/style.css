@@ -96,6 +96,7 @@
 }
 .wallet-name {
     font-size: x-large;
+    text-align: left;
 }
 .wallet-connected {
     padding: 10px;

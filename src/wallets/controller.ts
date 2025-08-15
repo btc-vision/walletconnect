@@ -6,7 +6,7 @@ import type {
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
-import { UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -17,6 +17,15 @@ class WalletController {
     }
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
+    }
+
+    static getProvider(): Unisat | null {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        const provider = wallet.controller.getProvider()
+        return provider ? new Proxy(provider, {}) : null;
     }
 
     static getNetwork(): Promise<WalletConnectNetwork> {

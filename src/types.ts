@@ -9,13 +9,3 @@ export interface WalletInformation {
     isInstalled: boolean;
     isConnected: boolean;
 }
-
-export interface WalletConnectChainMap {
-    [key: string]: string;
-}
-
-export const WalletConnectChainType: WalletConnectChainMap = {
-    BITCOIN_REGTEST: 'bitcoin',
-    BITCOIN_TESTNET: 'bitcoin',
-    BITCOIN_MAINNET: 'bitcoin'
-};

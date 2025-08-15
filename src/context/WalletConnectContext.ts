@@ -1,6 +1,7 @@
 import { createContext } from 'react';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { SupportedWallets } from '../wallets';
+import { Unisat } from '@btc-vision/transaction';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];
@@ -11,6 +12,7 @@ export type WalletConnectContextType = {
     connectToWallet: (wallet: SupportedWallets) => void;
     connecting: boolean;
     disconnect: () => void;
+    provider: Unisat | null;
 };
 
 export const WalletConnectContext = createContext<WalletConnectContextType | undefined>(undefined);

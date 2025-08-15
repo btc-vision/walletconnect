@@ -1,6 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { OPWalletInterface } from './interface';
-import { UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 
 interface OPWalletWindow extends Window {
@@ -12,8 +12,8 @@ const notInstalledError = 'OP_WALLET is not installed';
 class OPWallet implements WalletBase {
     private walletBase: OPWalletWindow['opnet'];
     private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
-    private disconnectHookWrapper?: () => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
+    private disconnectHookWrapper?: () => void;
     private _isConnected: boolean = false;
 
     isInstalled() {
@@ -45,6 +45,10 @@ class OPWallet implements WalletBase {
         return this._isConnected ? await this.walletBase.disconnect().then(() => {
             this._isConnected = false;
         }) : undefined;
+    }
+
+    getProvider(): Unisat | null {
+        return this._isConnected && this.walletBase || null;
     }
 
     getPublicKey(): Promise<string> {
