@@ -23,6 +23,12 @@ class UnisatWallet implements WalletBase {
     isConnected() {
         return !!this.walletBase && this._isConnected;
     }
+    async canAutoConnect(): Promise<boolean> {
+        // getAccounts returns empty array if not connected,
+        // without launching connection modal window.
+        const accounts = await this.walletBase?.getAccounts() || []
+        return accounts.length > 0;
+    }
 
     getProvider(): Unisat | null {
         return this._isConnected && this.walletBase || null;
@@ -135,7 +141,7 @@ class UnisatWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
+    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
         console.log('Setting chain changed hook for Unisat');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -143,7 +149,10 @@ class UnisatWallet implements WalletBase {
 
         this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
             console.log('Unisat ChainChanged Hook', network);
-            fn(network);
+            fn({
+                chainType: network.enum,
+                network: network.network,
+            });
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);
