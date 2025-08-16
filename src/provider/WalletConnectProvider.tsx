@@ -77,19 +77,24 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                     if (!response.data || response.data.length === 0) {
                         return;
                     }
+                    console.log("Connect 1", response.data[0])
                     setWalletAddress(response.data[0]);
                     const publicKey = await WalletController.getPublicKey();
+                    console.log("Connect 2", publicKey)
                     setPublicKey(publicKey);
                     const network = await WalletController.getNetwork();
+                    console.log("Connect 3", network)
                     setNetwork(network);
 
                     WalletController.setAccountsChangedHook(accountsChanged)
                     WalletController.setChainChangedHook(chainChanged);
                     WalletController.setDisconnectHook(disconnect);
+                    console.log("Connect 4")
 
                     closeConnectModal();
                     setSelectedWallet(wallet);
                     localStorage.setItem('WC_SelectedWallet', wallet);
+                    console.log("Connect 5")
                 } else if (response.data && 'message' in response.data) {
                     setConnectError(response.data.message);
                 } else {
