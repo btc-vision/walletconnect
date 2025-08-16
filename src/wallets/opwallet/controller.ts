@@ -23,6 +23,12 @@ class OPWallet implements WalletBase {
     isConnected() {
         return !!this.walletBase && this._isConnected;
     }
+    async canAutoConnect(): Promise<boolean> {
+        // getAccounts returns empty array if not connected,
+        // without launching connection modal window.
+        const accounts = await this.walletBase?.getAccounts() || []
+        return accounts.length > 0;
+    }
 
     getChainId(): void {
         throw new Error('Method not implemented.');
@@ -135,7 +141,7 @@ class OPWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
+    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
         console.log('Setting chain changed hook for OPWallet');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -143,7 +149,10 @@ class OPWallet implements WalletBase {
 
         this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
             console.log('OPWallet ChainChanged Hook', network);
-            fn(network);
+            fn({
+                chainType: network.enum,
+                network: network.network,
+            });
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);

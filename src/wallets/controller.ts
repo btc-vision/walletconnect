@@ -6,7 +6,7 @@ import type {
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
-import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat } from '@btc-vision/transaction';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -42,6 +42,11 @@ class WalletController {
             return null;
         }
         return wallet.controller.getPublicKey();
+    }
+
+    static async canAutoConnect(walletName: string) {
+        const wallet = this.wallets.get(walletName);
+        return wallet && await wallet.controller.canAutoConnect() || false
     }
 
     static async connect(
@@ -117,7 +122,7 @@ class WalletController {
         }
     }
 
-    static setChainChangedHook(fn: (chain: UnisatChainInfo) => void): void {
+    static setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
         const wallet = this.currentWallet;
         if (!wallet) {
             console.log('No current wallet to set network switch hook for');

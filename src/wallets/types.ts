@@ -1,10 +1,11 @@
 import type { WalletConnectNetwork } from '../types.ts';
 import { SupportedWallets } from './index';
-import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat } from '@btc-vision/transaction';
 
 export interface WalletBase {
     isInstalled(): boolean;
     isConnected(): boolean;
+    canAutoConnect(): Promise<boolean>;
     getProvider(): Unisat | null;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
@@ -14,7 +15,7 @@ export interface WalletBase {
     removeAccountsChangedHook(): void;
     setDisconnectHook(fn: () => void): void;
     removeDisconnectHook(): void;
-    setChainChangedHook(fn: (network: UnisatChainInfo) => void): void;
+    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void;
     removeChainChangedHook(): void;
     getChainId(): void;
 }

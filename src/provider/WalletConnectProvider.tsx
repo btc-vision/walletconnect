@@ -10,7 +10,7 @@ import type {
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
-import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -107,16 +107,18 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     );
 
     const attemptReconnect = useCallback(async () => {
-        console.warn('Trying to reconnect...', selectedWallet, connecting, supportedWallets);
-        if (!selectedWallet || !supportedWallets || connecting) return;
+        console.warn('Trying to reconnect...', selectedWallet, connecting);
+        if (!selectedWallet || connecting) return;
+
+        // Ensure we can connect without launching modal popup windows!
+        const canAutoConnect = await WalletController.canAutoConnect(selectedWallet);
+        console.log("CanAutoConnect", canAutoConnect);
+        if (!canAutoConnect) return;
+
         let attempts = 0;
 
         const reconnect = async () => {
             attempts++;
-            if (supportedWallets.length === 0) {
-                console.warn('No available wallets to reconnect to.');
-                return;
-            }
 
             const walletAvailable = WalletController.isWalletInstalled(selectedWallet)
             if (walletAvailable) {
@@ -132,7 +134,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
         await reconnect();
         // eslint-disable-next-line
-    }, [selectedWallet, supportedWallets, connectToWallet]);
+    }, [selectedWallet, connectToWallet]);
 
     useEffect(() => {
         void attemptReconnect();
@@ -147,18 +149,16 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 if (account !== null) {
                     const publicKey = await WalletController.getPublicKey();
                     setPublicKey(publicKey);
+                } else {
+                    setPublicKey(null);
                 }
             }
         }, [selectedWallet, setWalletAddress, setPublicKey]
     );
 
     const chainChanged = useCallback(
-        (chainInfo: UnisatChainInfo): void => {
+        (network: WalletConnectNetwork): void => {
             if (selectedWallet) {
-                const network: WalletConnectNetwork = {
-                    chainType: chainInfo.enum,
-                    network: chainInfo.network,
-                }
                 setNetwork(network);
             }
         }, [selectedWallet, setNetwork]

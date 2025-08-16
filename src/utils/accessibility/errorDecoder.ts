@@ -59,7 +59,7 @@ export const _e = (err: string | Error, locales: string[] = ['en']): string => {
 // This is mostly for debugging as it return the full matched information.
 // returns [orig, pattern, translation] where
 // - orig is the original key in the patterns definition
-// - pattern is the transformed (lowercase, regex, etc) key
+// - pattern is the transformed (lowercase, regex, etc.) key
 // - translation is the resulting translation for the current key
 export const _match_e = (err: string, locales: string[] = ['en']): string[] => {
     const normalizedLocales = _normalizeLocales(locales);

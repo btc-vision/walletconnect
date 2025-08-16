@@ -22,6 +22,9 @@ class TestWallet implements WalletBase {
     isConnected() {
         return false;
     }
+    async canAutoConnect(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
 
     getProvider(): Unisat | null {
         return this.walletBase || null;
@@ -120,13 +123,16 @@ class TestWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
+    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
         if (!this.isInstalled()) {
             throw new Error(notInstalledError);
         }
 
         this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
-            fn(network);
+            fn({
+                chainType: network.enum,
+                network: network.network,
+            });
         };
 
         this.walletBase?.on('chainChanged', (e) => this.chainChangedHookWrapper?.(e));
