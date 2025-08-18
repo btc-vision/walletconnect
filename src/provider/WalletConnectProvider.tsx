@@ -146,12 +146,8 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             if (selectedWallet) {
                 const account = accounts.length > 0 ? accounts[0] : null;
                 setWalletAddress(account)
-                if (account !== null) {
-                    const publicKey = await WalletController.getPublicKey();
-                    setPublicKey(publicKey);
-                } else {
-                    setPublicKey(null);
-                }
+                const publicKey = account ? await WalletController.getPublicKey() : null;
+                setPublicKey(publicKey);
             }
         }, [selectedWallet, setWalletAddress, setPublicKey]
     );
