@@ -10,7 +10,7 @@ import type {
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
-import { Unisat } from '@btc-vision/transaction';
+import { Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -30,6 +30,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [provider, setProvider] = useState<Unisat | null>(null);
+    const [signer, setSigner] = useState<UnisatSigner | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -182,15 +183,22 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     useEffect(() => {
         const provider = walletAddress ? WalletController.getProvider() : null;
-        console.log("Updating provider", provider != null, walletAddress)
         setProvider(provider)
     }, [walletAddress]);
+
+    useEffect(() => {
+        const updateSigner = async () => {
+            const signer = publicKey ? await WalletController.getSigner() : null;
+            setSigner(signer)
+        }
+        void updateSigner();
+    }, [network, publicKey]);
 
     return (
         <WalletConnectContext.Provider
             value={{ walletAddress, publicKey, connecting, connectToWallet,
                 disconnect, openConnectModal, network, allWallets,
-                provider }}>
+                provider, signer }}>
             {children}
             {modalOpen && (
                 <div className="wallet-connect-modal-backdrop">
