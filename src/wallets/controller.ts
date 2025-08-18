@@ -13,7 +13,7 @@ class WalletController {
     private static currentWallet: WalletConnectWallet | null = null;
 
     static getWallets = () => {
-        return WalletController.wallets.values().toArray();
+        return [...(WalletController.wallets.values())];
     }
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
