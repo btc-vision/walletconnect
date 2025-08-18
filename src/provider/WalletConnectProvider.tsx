@@ -75,7 +75,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
                 if (response.code === 200 && Array.isArray(response.data)) {
                     if (!response.data || response.data.length === 0) {
-                        return;
+                        return false;
                     }
                     console.log("Connect 1", response.data[0])
                     setWalletAddress(response.data[0]);
@@ -95,6 +95,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                     setSelectedWallet(wallet);
                     localStorage.setItem('WC_SelectedWallet', wallet);
                     console.log("Connect 5")
+                    return true
                 } else if (response.data && 'message' in response.data) {
                     setConnectError(response.data.message);
                 } else {
@@ -106,6 +107,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             } finally {
                 setConnecting(false);
             }
+            return false
         },
         // eslint-disable-next-line
         [disconnect]
@@ -146,27 +148,31 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }, [attemptReconnect]);
 
     const accountsChanged = useCallback(
-        async (accounts:string[])=> {
-            console.log("Accounts", accounts)
+        async (accounts:string[], forceConnect?: boolean)=> {
+            console.log("Accounts", accounts, forceConnect)
             if (selectedWallet) {
                 const account = accounts.length > 0 ? accounts[0] : null;
                 setWalletAddress(account)
-                if (account !== null) {
-                    const publicKey = await WalletController.getPublicKey();
-                    setPublicKey(publicKey);
-                } else {
-                    setPublicKey(null);
-                }
+                const publicKey = account ? await WalletController.getPublicKey() : null;
+                setPublicKey(publicKey);
+                if (forceConnect) await connectToWallet(selectedWallet);
             }
-        }, [selectedWallet, setWalletAddress, setPublicKey]
+        }, [connectToWallet, selectedWallet, setWalletAddress, setPublicKey]
     );
 
     const chainChanged = useCallback(
-        (network: WalletConnectNetwork): void => {
+        async (network: WalletConnectNetwork, forceConnect?:boolean) => {
             if (selectedWallet) {
+                console.log("chainChanged", network, forceConnect);
                 setNetwork(network);
+                if (forceConnect !== undefined) {
+                    if (!forceConnect || !await connectToWallet(selectedWallet)) {
+                        setWalletAddress(null)
+                        setPublicKey(null)
+                    }
+                }
             }
-        }, [selectedWallet, setNetwork]
+        }, [connectToWallet, selectedWallet, setNetwork]
     );
 
     const allWallets = useMemo(() => {

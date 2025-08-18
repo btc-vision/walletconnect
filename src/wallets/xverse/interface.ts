@@ -102,7 +102,7 @@ interface SignedTransactionResult {
 export interface XverseBitcoinProvider {
     connect: () => Promise<void>;
     addListener(event: 'accountChange', callback: (args: XverseAccountChangeEvent) => void): () => void;
-    addListener(event: 'accountDisconnected', callback: (args: XverseAccountDisconnectedEvent) => void): () => void;
+    addListener(event: 'disconnect', callback: (args: XverseAccountDisconnectedEvent) => void): () => void;
     addListener(event: 'networkChange', callback: (args: XverseNetworkChangeEvent) => void): () => void;
     createInscription: (data: InscriptionData) => Promise<InscriptionResult>;
     createRepeatInscriptions: (data: RepeatInscriptionsData) => Promise<InscriptionResult[]>;

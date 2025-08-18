@@ -5,7 +5,7 @@ import type {
     XverseResponse, XverseResult,
     XverseWalletInterface,
 } from './interface';
-import { Unisat, UnisatChainInfo, UnisatChainType, UnisatNetwork } from '@btc-vision/transaction';
+import { Unisat, UnisatChainType, UnisatNetwork } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 import { XverseProvider } from './provider';
 
@@ -29,13 +29,11 @@ class XverseWallet implements WalletBase {
     isConnected() {
         return !!this.walletBase && this._isConnected;
     }
-
-    request(method: string, params?: object): Promise<XverseResponse>  {
-        if (!this.isInstalled() || !this.walletBase) {
-            throw new Error(notInstalledError);
-        }
-
-        return this.walletBase.request(method, params)
+    async canAutoConnect(): Promise<boolean> {
+        const request_params = { purposes: ['payment'] };
+        return await this.walletBase?.request("getAddresses", request_params).then(response => {
+            return !!response.result
+        }) || false
     }
 
     getChainId(): void {
@@ -121,7 +119,7 @@ class XverseWallet implements WalletBase {
         });
     }
 
-    setAccountsChangedHook(fn: (accounts: string[]) => void): void {
+    setAccountsChangedHook(fn: (accounts: string[], forceConnect?: boolean) => void): void {
         console.log('Setting account changed hook for Xverse');
 
         if (!this.isInstalled() || !this.walletBase) {
@@ -135,11 +133,14 @@ class XverseWallet implements WalletBase {
 
             if (xWallet) {
                 fn([xWallet.address]);
-            } else {
-                console.log('Xverse Account Changed Hook --> Disconnect');
-                this._isConnected = false;
-                this.disconnectHookWrapper?.()
             }
+            else {
+                fn([], true)
+            }
+            //    console.log('Xverse Account Changed Hook --> Disconnect');
+            //    this._isConnected = false;
+            //    this.disconnectHookWrapper?.()
+            //}
         };
 
         this.accountsChangedHookWrapper = this.walletBase.addListener('accountChange', callback);
@@ -169,7 +170,7 @@ class XverseWallet implements WalletBase {
             fn();
         };
 
-        this.disconnectHookWrapper = this.walletBase.addListener('accountDisconnected', callback);
+        this.disconnectHookWrapper = this.walletBase.addListener('disconnect', callback);
     }
 
     removeDisconnectHook(): void {
@@ -184,7 +185,7 @@ class XverseWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: UnisatChainInfo) => void): void {
+    setChainChangedHook(fn: (network: WalletConnectNetwork, forceConnect?:boolean) => void): void {
         console.log('Setting chain changed hook for Xverse');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -193,11 +194,11 @@ class XverseWallet implements WalletBase {
         const callback = (network: XverseNetworkChangeEvent) => {
             console.log('Xverse ChainChanged Hook', network);
             const name = network?.bitcoin?.name?.toLocaleLowerCase() || ''
+            const addresses = network?.addresses || []
             fn({
-                enum: this.getChainName(name),
-                name: '',
+                chainType: this.getChainName(name),
                 network: name.toLocaleLowerCase() as UnisatNetwork,
-            })
+            }, addresses.length > 0)
         };
 
         this.chainChangedHookWrapper = this.walletBase.addListener('networkChange', callback);
