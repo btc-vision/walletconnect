@@ -29,6 +29,9 @@ class TestWallet implements WalletBase {
     getProvider(): Unisat | null {
         return this.walletBase || null;
     }
+    async getSigner(): Promise<null> {
+        return Promise.resolve(null);
+    }
 
     getChainId(): void {
         throw new Error('Method not implemented.');

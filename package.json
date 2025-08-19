@@ -9,7 +9,6 @@
     },
     "exports": {
         ".": {
-            "browser": "./browser/index.js",
             "import": "./build/index.js",
             "require": "./build/index.js",
             "types": "./build/index.d.ts"
@@ -89,11 +88,13 @@
         "@btc-vision/bitcoin": "^6.4.6",
         "@btc-vision/transaction": "^1.6.1",
         "@eslint/js": "^9.32.0",
+        "css-loader": "^7.1.2",
         "eslint-plugin-react-hooks": "^5.2.0",
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.4.0",
         "gulp-logger-new": "^1.0.1",
         "opnet": "^1.6.1",
-        "webpack": "^5.101.0"
+        "style-loader": "^4.0.0",
+        "webpack": "^5.101.3"
     }
 }

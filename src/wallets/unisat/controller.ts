@@ -1,6 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
-import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
+import { Unisat, UnisatChainInfo, UnisatSigner } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 
 interface UnisatWalletWindow extends Window {
@@ -32,6 +32,11 @@ class UnisatWallet implements WalletBase {
 
     getProvider(): Unisat | null {
         return this._isConnected && this.walletBase || null;
+    }
+    async getSigner(): Promise<UnisatSigner> {
+        const signer = new UnisatSigner();
+        await signer.init()
+        return signer
     }
 
     getChainId(): void {

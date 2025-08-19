@@ -56,6 +56,9 @@ class OPWallet implements WalletBase {
     getProvider(): Unisat | null {
         return this._isConnected && this.walletBase || null;
     }
+    async getSigner(): Promise<null> {
+        return Promise.resolve(null);
+    }
 
     getPublicKey(): Promise<string> {
         if (!this.isInstalled() || !this.walletBase) {

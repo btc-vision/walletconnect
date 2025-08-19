@@ -6,14 +6,14 @@ import type {
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
-import { Unisat } from '@btc-vision/transaction';
+import { Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
     static getWallets = () => {
-        return WalletController.wallets.values().toArray();
+        return [...(WalletController.wallets.values())];
     }
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
@@ -24,8 +24,17 @@ class WalletController {
         if (!wallet) {
             return null;
         }
+        // Needs to return a Proxy to be sure useEffects are triggered
         const provider = wallet.controller.getProvider()
         return provider ? new Proxy(provider, {}) : null;
+    }
+
+    static async getSigner(): Promise<UnisatSigner | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        return await wallet.controller.getSigner()
     }
 
     static getNetwork(): Promise<WalletConnectNetwork> {

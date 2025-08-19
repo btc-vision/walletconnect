@@ -37,4 +37,5 @@ WalletController.registerWallet({
     controller: new TestWallet()
 });
 
-export { WalletController, SupportedWallets };
+export { WalletController,  };
+export type { SupportedWallets };
