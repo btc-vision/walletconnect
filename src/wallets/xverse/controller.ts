@@ -5,7 +5,7 @@ import type {
     XverseResponse, XverseResult,
     XverseWalletInterface,
 } from './interface';
-import { Unisat, UnisatChainType, UnisatNetwork } from '@btc-vision/transaction';
+import { Unisat, UnisatChainType, UnisatNetwork, XverseSigner } from '@btc-vision/transaction';
 import type { WalletConnectNetwork } from '../../types.ts';
 import { XverseProvider } from './provider';
 
@@ -70,6 +70,11 @@ class XverseWallet implements WalletBase {
 
     getProvider(): Unisat | null {
         return this._isConnected && this.walletBase && new XverseProvider(this.walletBase) || null;
+    }
+    async getSigner(): Promise<XverseSigner> {
+        const signer = new XverseSigner();
+        await signer.init()
+        return signer
     }
 
     async getPublicKey(): Promise<string> {

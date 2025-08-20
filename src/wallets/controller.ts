@@ -6,7 +6,8 @@ import type {
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
-import { Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Unisat, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { SupportedWallets } from './index';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -17,6 +18,10 @@ class WalletController {
     }
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
+    }
+    static isSameWallet(wallet: SupportedWallets | null): boolean {
+        console.log("Current Wallet", this.currentWallet?.name, wallet);
+        return this.currentWallet?.name == wallet;
     }
 
     static getProvider(): Unisat | null {
@@ -29,7 +34,7 @@ class WalletController {
         return provider ? new Proxy(provider, {}) : null;
     }
 
-    static async getSigner(): Promise<UnisatSigner | null> {
+    static async getSigner(): Promise<UnisatSigner | XverseSigner | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;

@@ -10,7 +10,7 @@ import type {
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
-import { Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Unisat, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -30,7 +30,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [provider, setProvider] = useState<Unisat | null>(null);
-    const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [signer, setSigner] = useState<UnisatSigner | XverseSigner | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -156,7 +156,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 setWalletAddress(account)
                 const publicKey = account ? await WalletController.getPublicKey() : null;
                 setPublicKey(publicKey);
-                if (forceConnect) await connectToWallet(selectedWallet);
+                if (forceConnect && WalletController.isSameWallet(selectedWallet)) await connectToWallet(selectedWallet);
             }
         }, [connectToWallet, selectedWallet, setWalletAddress, setPublicKey]
     );
@@ -166,7 +166,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             if (selectedWallet) {
                 console.log("chainChanged", network, forceConnect);
                 setNetwork(network);
-                if (forceConnect !== undefined) {
+                if (forceConnect !== undefined && WalletController.isSameWallet(selectedWallet)) await connectToWallet(selectedWallet); {
                     if (!forceConnect || !await connectToWallet(selectedWallet)) {
                         setWalletAddress(null)
                         setPublicKey(null)
