@@ -7,6 +7,8 @@ import type {
 import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
 import { Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { SupportedWallets } from './index';
+import { AbstractRpcProvider } from 'opnet';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -18,14 +20,27 @@ class WalletController {
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
     }
+    static getWalletType(): SupportedWallets | null {
+        return WalletController.currentWallet?.name || null;
+    }
 
-    static getProvider(): Unisat | null {
+    static getWalletWindow(): Unisat | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = wallet.controller.getProvider()
+        const walletWindow = wallet.controller.getWalletWindow()
+        return walletWindow ? new Proxy(walletWindow, {}) : null;
+    }
+
+    static async getProvider(): Promise<AbstractRpcProvider | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        // Needs to return a Proxy to be sure useEffects are triggered
+        const provider = await wallet.controller.getProvider()
         return provider ? new Proxy(provider, {}) : null;
     }
 

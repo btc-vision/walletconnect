@@ -8,19 +8,19 @@
 }
 
 .wallet-connect-dark-theme {
-    --background-color: #171239;
-    --primaryColor: #9698E2;
-    --border-color: #201B4E;
-
-    --button-background-color: #140932;
-    --icon-filter: unset;
-}
-
-.wallet-connect-darker-theme {
     --background-color: #1E1E1E;
     --primaryColor: #FFFFFF;
     --border-color: #333333;
 
     --button-background-color: #2A2A2A;
+    --icon-filter: unset;
+}
+
+.wallet-connect-moto-theme {
+    --background-color: #171239;
+    --primaryColor: #9698E2;
+    --border-color: #201B4E;
+
+    --button-background-color: #140932;
     --icon-filter: unset;
 }
