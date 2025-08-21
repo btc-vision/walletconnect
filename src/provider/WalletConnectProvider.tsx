@@ -7,6 +7,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet
 } from '../wallets/types.ts';
+import '../utils/theme.css';
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
@@ -14,7 +15,12 @@ import { Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
-const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface WalletConnectProviderProps {
+    theme?: 'light' | 'dark' | 'darker';
+    children: ReactNode,
+}
+
+const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, children }) => {
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -194,6 +200,11 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         void updateSigner();
     }, [network, publicKey]);
 
+    const currentTheme = useMemo(() => {
+        const currentTheme = theme || 'light';
+        return `wallet-connect-${currentTheme}-theme`;
+    }, [theme]);
+
     return (
         <WalletConnectContext.Provider
             value={{ walletAddress, publicKey, connecting, connectToWallet,
@@ -201,7 +212,7 @@ const WalletConnectProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 provider, signer }}>
             {children}
             {modalOpen && (
-                <div className="wallet-connect-modal-backdrop">
+                <div className={`wallet-connect-modal-backdrop ${currentTheme}`}>
                     <div
                         className="wallet-connect-modal"
                         role="dialog"

@@ -13,9 +13,9 @@
 }
 
 .wallet-connect-modal{
-    background-color: #1b1d20;
-    border:1px solid #2a2e33;
-    color: #fff;
+    background-color: var(--background-color);
+    border:1px solid var(--border-color);
+    color: var(--primaryColor);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 400px;
@@ -25,7 +25,7 @@
 
 .wallet-connect-header{
     padding: 16px;
-    border-bottom: 1px solid #2a2e33;
+    border-bottom: 1px solid var(--border-color);
     display:flex;
     align-items: center;
     justify-content: space-between;
@@ -40,18 +40,25 @@
     display:flex;
     align-items: center;
     justify-content: center;
-    color:white;
-    fill:white;
+    color:var(--primaryColor);
+    fill:var(--primaryColor);
+    background-color: var(--background-color);
     cursor:pointer;
+}
+.wallet-connect-header > button.close:hover {
+    border:1px solid rgba(254, 121, 1, 0.3);
+    background-color: rgba(254, 121, 1, 0.1);
+}
+.wallet-connect-header > button.close svg {
+    display: flex;
 }
 
 .wallet-connect-header > button.close .close-x-path{
-    stroke: rgba(198, 195, 195, 0.8);
+    stroke:var(--primaryColor);
     transition: stroke 0.2s ease;
 }
 
 .wallet-connect-header > button.close:hover .close-x-path{
-    stroke: white;
 }
 
 .wallet-list{
@@ -60,24 +67,23 @@
     padding: 16px;
     display:flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 10px;
 }
 
 .wallet-list > button{
     display: flex;
     align-items: center;
     gap: 12px;
+    height: 64px;
     justify-content: space-between;
     padding: 12px;
-    background-color: transparent;
     color: #fff;
     width: 100%;
     text-align: left;
     cursor: pointer;
     border-radius: 10px;
-    border:1px solid #2a2e33;
-    background-image: linear-gradient(135deg, #131517 0%, rgba(30, 33, 36, 0.5) 100%);
-    transition: background-color 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+    border:1px solid var(--border-color);
+    background-color: var(--button-background-color)
 }
 .wallet-list > button:disabled{
     opacity: 0.3;
@@ -93,6 +99,7 @@
 }
 .wallet-icon img {
     max-height: 32px;
+    filter: var(--icon-filter)
 }
 .wallet-name {
     font-size: x-large;
@@ -114,8 +121,11 @@ div.wallet-not-installed {
 
 .wallet-connect-error > p{
     color: #ff4d4d;
+    text-align: center;
     background-color: rgba(255, 77, 77, 0.1);
-    font-size:13px;
-    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bolder;
+    padding: 20px 10px;
     border-radius: 10px;
+    border: 1px solid #ff4d4d;
 }

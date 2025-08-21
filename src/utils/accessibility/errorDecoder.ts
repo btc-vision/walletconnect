@@ -15,15 +15,15 @@ const _translation = (err: ErrorTranslations, locale: string | null) => {
     // a 'get' locale, we should not try to call err['get']...
     switch (locale) {
         case 'en':
-            return String(err['en'] || '');
+            return err['en'] || '';
         case 'en-us':
-            return String(err['en-US'] || '');
+            return err['en-US'] || '';
         case 'fr':
-            return String(err['fr'] || '');
+            return err['fr'] || '';
         case 'fr-ca':
-            return String(err['fr-CA'] || '');
+            return err['fr-CA'] || '';
+        default: return '';
     }
-    return String('');
 };
 
 const _errors = (err: string | ErrorTranslations, locales: string[]) => {

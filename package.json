@@ -59,6 +59,7 @@
         "watch": "gulp watch",
         "build": "gulp build",
         "setup": "npm i && npm run build",
+        "lint": "eslint .",
         "browserBuild": "webpack --mode production"
     },
     "peerDependencies": {
