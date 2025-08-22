@@ -11,8 +11,7 @@ import '../utils/theme.css';
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { DefaultWalletConnectChain } from '../consts';
-import { Unisat, UnisatSigner } from '@btc-vision/transaction';
-import { AbstractRpcProvider } from 'opnet';
+import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -37,8 +36,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets|null>(null);
-    const [walletWindow, setWalletWindow] = useState<Unisat | null>(null);
-    const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
+    const [provider, setProvider] = useState<Unisat | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
 
     const clearConnectError = useCallback(() => {
@@ -193,17 +191,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
         setWalletType(walletType);
-        const walletWindow = walletAddress ? WalletController.getWalletWindow() : null;
-        setWalletWindow(walletWindow);
+        const provider = walletAddress ? WalletController.getProvider() : null;
+        setProvider(provider);
     }, [walletAddress]);
-
-    useEffect(() => {
-        const updateWalletInfo = async () => {
-            const provider = walletAddress ? await WalletController.getProvider() : null;
-            setProvider(provider);
-        }
-        void updateWalletInfo();
-    }, [walletAddress,network]);
 
     useEffect(() => {
         const updateSigner = async () => {
@@ -218,11 +208,15 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         return `wallet-connect-${currentTheme}-theme`;
     }, [theme]);
 
+    const address = useMemo(() => {
+        return publicKey ? Address.fromString(publicKey) : null;
+    }, [publicKey])
+
     return (
         <WalletConnectContext.Provider
-            value={{ walletAddress, publicKey, connecting, connectToWallet,
+            value={{ walletAddress, publicKey, address, connecting, connectToWallet,
                 disconnect, openConnectModal, network, allWallets,
-                provider, signer, walletType, walletWindow }}>
+                provider, signer, walletType }}>
             {children}
             {modalOpen && (
                 <div className={`wallet-connect-modal-backdrop ${currentTheme}`}>

@@ -18,14 +18,15 @@ Old version                     New version
     connect                         connectToWallet,
     disconnect                      disconnect,
     walletType                      walletType,
-    walletWindowInstance            walletWindow,
-    account                     
-      - isConnected                 provider != null
+    walletWindowInstance            provider
+    account                         -
+      - isConnected                 publicKey != null
       - signer                      signer
-      - address                     publicKey
+      - address                     address
+                                    publicKey (address.toString())
       - addressTyped
       - network                     network
-      - provider                    provider
+      - provider                    -
 
 } = useWallet()                 } = useWalletConnect()
 ```

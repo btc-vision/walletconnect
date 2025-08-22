@@ -8,7 +8,7 @@ import { _e } from '../utils/accessibility/errorDecoder';
 import type { WalletConnectNetwork } from '../types.ts';
 import { Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { SupportedWallets } from './index';
-import { AbstractRpcProvider } from 'opnet';
+import { DefaultWalletConnectChain } from '../consts';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -24,23 +24,13 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getWalletWindow(): Unisat | null {
+    static getProvider(): Unisat | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const walletWindow = wallet.controller.getWalletWindow()
-        return walletWindow ? new Proxy(walletWindow, {}) : null;
-    }
-
-    static async getProvider(): Promise<AbstractRpcProvider | null> {
-        const wallet = this.currentWallet;
-        if (!wallet) {
-            return null;
-        }
-        // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = await wallet.controller.getProvider()
+        const provider = wallet.controller.getProvider()
         return provider ? new Proxy(provider, {}) : null;
     }
 
@@ -52,12 +42,12 @@ class WalletController {
         return await wallet.controller.getSigner()
     }
 
-    static getNetwork(): Promise<WalletConnectNetwork> {
+    static async getNetwork(): Promise<WalletConnectNetwork> {
         const wallet = this.currentWallet;
         if (!wallet) {
-            throw new Error('No wallet connected');
+            return DefaultWalletConnectChain;
         }
-        return wallet.controller.getNetwork();
+        return await wallet.controller.getNetwork();
     }
 
     static async getPublicKey(): Promise<string | null> {
