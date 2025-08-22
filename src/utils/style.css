@@ -1,0 +1,131 @@
+.wallet-connect-modal-backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 11, 13, 0.5);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wallet-connect-modal{
+    background-color: var(--background-color);
+    border:1px solid var(--border-color);
+    color: var(--primaryColor);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    max-width: 90%;
+    z-index: 10000;
+}
+
+.wallet-connect-header{
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.wallet-connect-header > button.close{
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    color:var(--primaryColor);
+    fill:var(--primaryColor);
+    background-color: var(--background-color);
+    cursor:pointer;
+}
+.wallet-connect-header > button.close:hover {
+    border:1px solid rgba(254, 121, 1, 0.3);
+    background-color: rgba(254, 121, 1, 0.1);
+}
+.wallet-connect-header > button.close svg {
+    display: flex;
+}
+
+.wallet-connect-header > button.close .close-x-path{
+    stroke:var(--primaryColor);
+    transition: stroke 0.2s ease;
+}
+
+.wallet-connect-header > button.close:hover .close-x-path{
+}
+
+.wallet-list{
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 16px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wallet-list > button{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 64px;
+    justify-content: space-between;
+    padding: 12px;
+    color: #fff;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 10px;
+    border:1px solid var(--border-color);
+    background-color: var(--button-background-color)
+}
+.wallet-list > button:disabled{
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.wallet-list > button:hover{
+    border:1px solid rgba(254, 121, 1, 0.3);
+    background-color: rgba(254, 121, 1, 0.1);
+}
+.wallet-icon {
+    display: flex;
+}
+.wallet-icon img {
+    max-height: 32px;
+    filter: var(--icon-filter)
+}
+.wallet-name {
+    font-size: x-large;
+    text-align: left;
+}
+.wallet-connected {
+    padding: 10px;
+    font-size: medium;
+    color: green;
+}
+div.wallet-not-installed {
+    padding: 10px;
+    font-size: medium;
+}
+
+.wallet-connect-error{
+    padding: 16px 16px 0;
+}
+
+.wallet-connect-error > p{
+    color: #ff4d4d;
+    text-align: center;
+    background-color: rgba(255, 77, 77, 0.1);
+    font-size: 14px;
+    font-weight: bolder;
+    padding: 20px 10px;
+    border-radius: 10px;
+    border: 1px solid #ff4d4d;
+}

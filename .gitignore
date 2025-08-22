@@ -410,3 +410,7 @@ yarn.lock
 package-lock.json
 docs/*
 .yarn/
+
+# Packaging
+*.tgz
+
