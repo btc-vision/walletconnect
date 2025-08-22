@@ -5,34 +5,35 @@ This new version makes it easier for developer to use the library to connect to 
 
 ### New features
  * Themes support (current themes are light, dark and moto)
- * Some properties are moved to the WalletConnect context for easier use
-   * test
+ * Auto reconnect only if already logged in the wallet
 
 ### Breaking changes
- * 
+ * Some properties are moved to the WalletConnect context for easier use
 
 ### Migration
 ```
-Old version                     New version
+Old version            -->      New version
 {                               {
-    connect                         connectToWallet,
-    disconnect                      disconnect,
-    walletType                      walletType,
+                                    allWallets
+                                    openConnectModal
+    connect                         connectToWallet
+    disconnect                      disconnect
+    walletType                      walletType
     walletWindowInstance            provider
     account                         -
       - isConnected                 publicKey != null
       - signer                      signer
-      - address                     address
-                                    publicKey (address.toString())
+      - address                     address (Address.fromString(publicKey))
+                                    publicKey (account publicKey)
+                                    walletAddress (account address)
       - addressTyped
       - network                     network
       - provider                    -
-
+                                    connecting
 } = useWallet()                 } = useWalletConnect()
 ```
-walletAddress, publicKey, connecting, connectToWallet,
-, openConnectModal, network, allWallets,
-provider, signer, , 
+walletAddress,
+
 
 ### Sample use of new version (snipets)
 **App.tsx**
