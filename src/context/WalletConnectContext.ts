@@ -5,8 +5,9 @@ import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];
-    network: WalletConnectNetwork;
+    walletType: string | null;
     walletAddress: string | null;
+    network: WalletConnectNetwork;
     publicKey: string | null;
     address: Address | null;
     openConnectModal: () => void;
@@ -15,7 +16,6 @@ export type WalletConnectContextType = {
     disconnect: () => void;
     provider: Unisat | null;
     signer: UnisatSigner | null;
-    walletType: string | null;
 };
 
 export const WalletConnectContext = createContext<WalletConnectContextType | undefined>(undefined);

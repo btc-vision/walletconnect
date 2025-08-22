@@ -1,7 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { OPWalletInterface } from './interface';
-import { Unisat, UnisatChainInfo } from '@btc-vision/transaction';
-import type { WalletConnectNetwork } from '../../types.ts';
+import { Unisat, UnisatChainInfo, UnisatChainType } from '@btc-vision/transaction';
 
 interface OPWalletWindow extends Window {
     opnet?: OPWalletInterface;
@@ -68,7 +67,7 @@ class OPWallet implements WalletBase {
         return this.walletBase.getPublicKey();
     }
 
-    async getNetwork(): Promise<WalletConnectNetwork> {
+    async getNetwork(): Promise<UnisatChainType> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
@@ -78,10 +77,7 @@ class OPWallet implements WalletBase {
             throw new Error('Failed to retrieve chain information');
         }
 
-        return {
-            network: chainInfo.network,
-            chainType: chainInfo.enum
-        };
+        return chainInfo.enum
     }
 
     setAccountsChangedHook(fn: (accounts: string[]) => void): void {
@@ -145,18 +141,15 @@ class OPWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
+    setChainChangedHook(fn: (chainType: UnisatChainType) => void): void {
         console.log('Setting chain changed hook for OPWallet');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
-        this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
-            console.log('OPWallet ChainChanged Hook', network);
-            fn({
-                chainType: network.enum,
-                network: network.network,
-            });
+        this.chainChangedHookWrapper = (chainInfo: UnisatChainInfo) => {
+            console.log('OPWallet ChainChanged Hook', chainInfo);
+            fn(chainInfo.enum);
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);

@@ -2,13 +2,14 @@ import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
     ControllerResponse,
-    WalletConnectWallet
+    WalletConnectWallet,
 } from './types.ts';
 import { _e } from '../utils/accessibility/errorDecoder';
-import type { WalletConnectNetwork } from '../types.ts';
-import { Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import { SupportedWallets } from './index';
-import { DefaultWalletConnectChain } from '../consts';
+import { Network, networks } from '@btc-vision/bitcoin';
+import { DefaultWalletConnectNetwork } from '../consts';
+import { WalletConnectNetwork } from '../types';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -42,12 +43,37 @@ class WalletController {
         return await wallet.controller.getSigner()
     }
 
+    //TODO: check if we really want to return a default network here
+    //      instead of null.  Default is there: DefaultWalletConnectChain.network
+    static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork {
+        const walletNetwork = (network: Network): WalletConnectNetwork => {
+            return { ...network, chainType: chainType };
+        }
+        switch (chainType) {
+            case UnisatChainType.BITCOIN_REGTEST:
+                return walletNetwork(networks.regtest);
+            case UnisatChainType.BITCOIN_TESTNET:
+                return walletNetwork(networks.testnet);
+            case UnisatChainType.BITCOIN_MAINNET:
+                return walletNetwork(networks.bitcoin);
+
+            case UnisatChainType.BITCOIN_TESTNET4:
+            case UnisatChainType.BITCOIN_SIGNET:
+            case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
+            case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
+            default:
+                return DefaultWalletConnectNetwork;
+        }
+    }
+
     static async getNetwork(): Promise<WalletConnectNetwork> {
         const wallet = this.currentWallet;
         if (!wallet) {
-            return DefaultWalletConnectChain;
+            return DefaultWalletConnectNetwork;
         }
-        return await wallet.controller.getNetwork();
+
+        const chainType = await wallet.controller.getNetwork()
+        return this.convertChainTypeToNetwork(chainType)
     }
 
     static async getPublicKey(): Promise<string | null> {
@@ -144,7 +170,9 @@ class WalletController {
         }
         try {
             wallet.controller.removeChainChangedHook()
-            wallet.controller.setChainChangedHook(fn);
+            wallet.controller.setChainChangedHook((chainType:UnisatChainType) => {
+                fn(this.convertChainTypeToNetwork(chainType));
+            });
         } catch (error) {
             console.error('Error setting network switch hook:', error);
         }

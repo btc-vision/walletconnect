@@ -1,7 +1,6 @@
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
-import { Unisat, UnisatChainInfo, UnisatSigner } from '@btc-vision/transaction';
-import type { WalletConnectNetwork } from '../../types.ts';
+import { Unisat, UnisatChainInfo, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 
 interface UnisatWalletWindow extends Window {
     unisat?: UnisatWalletInterface;
@@ -70,7 +69,7 @@ class UnisatWallet implements WalletBase {
         return this.walletBase.getPublicKey();
     }
 
-    async getNetwork(): Promise<WalletConnectNetwork> {
+    async getNetwork(): Promise<UnisatChainType> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
@@ -80,10 +79,7 @@ class UnisatWallet implements WalletBase {
             throw new Error('Failed to retrieve chain information');
         }
 
-        return {
-            network: chainInfo.network,
-            chainType: chainInfo.enum
-        };
+        return chainInfo.enum;
     }
 
     setAccountsChangedHook(fn: (accounts: string[]) => void): void {
@@ -147,18 +143,15 @@ class UnisatWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
+    setChainChangedHook(fn: (chainType: UnisatChainType) => void): void {
         console.log('Setting chain changed hook for Unisat');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
 
-        this.chainChangedHookWrapper = (network: UnisatChainInfo) => {
-            console.log('Unisat ChainChanged Hook', network);
-            fn({
-                chainType: network.enum,
-                network: network.network,
-            });
+        this.chainChangedHookWrapper = (chainInfo: UnisatChainInfo) => {
+            console.log('Unisat ChainChanged Hook', chainInfo);
+            fn(chainInfo.enum);
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);

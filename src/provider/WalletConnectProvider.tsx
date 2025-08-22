@@ -10,7 +10,7 @@ import type {
 import '../utils/theme.css';
 import '../utils/style.css';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
-import { DefaultWalletConnectChain } from '../consts';
+import { DefaultWalletConnectNetwork } from '../consts';
 import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
@@ -24,7 +24,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectChain);
+    const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
 
     const [supportedWallets ] = useState<WalletConnectWallet[]>(WalletController.getWallets);
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
@@ -71,7 +71,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         WalletController.removeChainChangedHook();
         WalletController.removeAccountsChangedHook();
         await WalletController.disconnect();
-        setNetwork(DefaultWalletConnectChain); // Triggers allWallets update after disconnecting
+        setNetwork(DefaultWalletConnectNetwork); // Triggers allWallets update after disconnecting
     }, []);
 
     const connectToWallet = useCallback(

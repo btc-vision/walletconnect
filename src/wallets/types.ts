@@ -1,6 +1,5 @@
-import type { WalletConnectNetwork } from '../types.ts';
 import { SupportedWallets } from './index';
-import { Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 export type { AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
@@ -12,12 +11,12 @@ export interface WalletBase {
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
     getPublicKey(): Promise<string | null>;
-    getNetwork(): Promise<WalletConnectNetwork>;
+    getNetwork(): Promise<UnisatChainType>;
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;
     setDisconnectHook(fn: () => void): void;
     removeDisconnectHook(): void;
-    setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void;
+    setChainChangedHook(fn: (network: UnisatChainType) => void): void;
     removeChainChangedHook(): void;
     getChainId(): void;
 }
