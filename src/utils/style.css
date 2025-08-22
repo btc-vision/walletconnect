@@ -110,10 +110,36 @@
     font-size: medium;
     color: green;
 }
-div.wallet-not-installed {
+.wallet-recommended {
     padding: 10px;
     font-size: medium;
+    color: black;
 }
+div.wallet-not-installed {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: medium;
+    border-radius: 10px;
+    border:1px solid var(--border-color);
+    background-color: var(--button-background-color)
+}
+div.wallet-not-installed .download-links {
+    display: flex;
+}
+div.wallet-not-installed img {
+    max-height: 32px;
+    position: relative;
+    display: block;
+}
+
+div.wallet-connect-content{
+    padding: 0 16px 16px 16px;
+    display:flex;
+    font-size: 14px;
+    text-align: left;
+}
+
 
 .wallet-connect-error{
     padding: 16px 16px 0;

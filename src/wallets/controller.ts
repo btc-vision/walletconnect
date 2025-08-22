@@ -15,8 +15,11 @@ class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
-    static getWallets = () => {
-        return [...(WalletController.wallets.values())];
+    static getWallets = (supportedWallets?:SupportedWallets[]) => {
+        const wallets = [...WalletController.wallets.values()]
+        return !supportedWallets ? wallets : wallets.filter((w)=>{
+            return supportedWallets.includes(w.name);
+        })
     }
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;

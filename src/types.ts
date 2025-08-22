@@ -10,4 +10,5 @@ export interface WalletInformation {
     icon: string;
     isInstalled: boolean;
     isConnected: boolean;
+    isRecommended: boolean;
 }

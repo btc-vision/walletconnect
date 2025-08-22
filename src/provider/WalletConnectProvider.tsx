@@ -17,21 +17,28 @@ const AUTO_RECONNECT_RETRIES = 5;
 
 interface WalletConnectProviderProps {
     theme?: 'light' | 'dark' | 'moto';
-    children: ReactNode,
+    supportedWallets?: SupportedWallets[];
+    recommendedWallet?: SupportedWallets;
+    children: ReactNode;
 }
 
-const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, children }) => {
+const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
+    const { theme, children } = props;
+    const { supportedWallets:  supportedWalletsName } = props;
+    const { recommendedWallet:  recommendedWalletName } = props;
+
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
 
-    const [supportedWallets ] = useState<WalletConnectWallet[]>(WalletController.getWallets);
+    const [supportedWallets ] = useState<WalletConnectWallet[]>(WalletController.getWallets(supportedWalletsName));
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
         () => localStorage.getItem('WC_SelectedWallet') as SupportedWallets || null
     );
     const [connecting, setConnecting] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [modalContent, setModalContent] = useState<ReactNode | null>(null);
 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -50,9 +57,10 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         }
     }, [connectError, clearConnectError]);
 
-    const openConnectModal = () => {
+    const openConnectModal = (children?:ReactNode) => {
         setConnectError(undefined);
         setModalOpen(true);
+        setModalContent(children);
     };
 
     const closeConnectModal = () => {
@@ -177,6 +185,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 icon: wallet.icon,
                 isInstalled: wallet.controller.isInstalled(),
                 isConnected: wallet.controller.isConnected(),
+                isRecommended: wallet.name == recommendedWalletName,
             }
         })
         // eslint-disable-next-line
@@ -272,7 +281,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
                                         {wallet.controller.isConnected()
                                             ? (<div className="wallet-connected">(Connected)</div>)
-                                            : (<></>)
+                                            : wallet.name == recommendedWalletName
+                                                ? (<div className="wallet-recommended">(Recommended)</div>)
+                                                : (<></>)
                                         }
                                         {wallet.controller.isInstalled()
                                             ? (<></>)
@@ -303,6 +314,10 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                 </div>
                             </div>
                         )}
+                        { modalContent
+                            ? <div className="wallet-connect-content">{modalContent}</div>
+                            : <></>
+                        }
                     </div>
                 </div>
             )}
