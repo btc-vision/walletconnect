@@ -1,6 +1,6 @@
+import { Unisat, UnisatChainInfo, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
-import { Unisat, UnisatChainInfo, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 
 interface UnisatWalletWindow extends Window {
     unisat?: UnisatWalletInterface;
@@ -25,18 +25,18 @@ class UnisatWallet implements WalletBase {
     async canAutoConnect(): Promise<boolean> {
         // getAccounts returns empty array if not connected,
         // without launching connection modal window.
-        const accounts = await this.walletBase?.getAccounts() || []
+        const accounts = (await this.walletBase?.getAccounts()) || [];
         return accounts.length > 0;
     }
 
     getProvider(): Unisat | null {
-        return this._isConnected && this.walletBase || null;
+        return (this._isConnected && this.walletBase) || null;
     }
 
     async getSigner(): Promise<UnisatSigner> {
         const signer = new UnisatSigner();
-        await signer.init()
-        return signer
+        await signer.init();
+        return signer;
     }
 
     getChainId(): void {
@@ -48,8 +48,8 @@ class UnisatWallet implements WalletBase {
             throw new Error(notInstalledError);
         }
         return this.walletBase.requestAccounts().then((accounts: string[]) => {
-            this._isConnected = accounts.length > 0
-            return accounts
+            this._isConnected = accounts.length > 0;
+            return accounts;
         });
     }
 
@@ -57,9 +57,11 @@ class UnisatWallet implements WalletBase {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return this._isConnected ? await this.walletBase.disconnect().then(() => {
-            this._isConnected = false;
-        }) : undefined;
+        return this._isConnected
+            ? await this.walletBase.disconnect().then(() => {
+                  this._isConnected = false;
+              })
+            : undefined;
     }
 
     getPublicKey(): Promise<string> {
@@ -95,9 +97,13 @@ class UnisatWallet implements WalletBase {
             if (accounts.length > 0) {
                 fn(accounts);
             } else {
-                console.log('Unisat Account Changed Hook --> Disconnect', accounts.length, !!this.disconnectHookWrapper);
+                console.log(
+                    'Unisat Account Changed Hook --> Disconnect',
+                    accounts.length,
+                    !!this.disconnectHookWrapper,
+                );
                 this._isConnected = false;
-                this.disconnectHookWrapper?.()
+                this.disconnectHookWrapper?.();
             }
         };
 

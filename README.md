@@ -19,8 +19,8 @@ from the connected wallet.
 
 ### Prerequisites
 
-- Node.js version 22.x
-- npm (Node Package Manager)
+-   Node.js version 22.x
+-   npm (Node Package Manager)
 
 ### Installation
 
@@ -35,17 +35,17 @@ Documentation is available at [docs.opnet.org](https://docs.opnet.org)
 #### Development
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/btc-vision/walletconnect.git
-   ```
+    ```bash
+    git clone https://github.com/btc-vision/walletconnect.git
+    ```
 2. Navigate to the repository directory:
-   ```bash
-   cd walletconnect
-   ```
+    ```bash
+    cd walletconnect
+    ```
 3. Install the required dependencies:
-   ```bash
-   npm i
-   ```
+    ```bash
+    npm i
+    ```
 
 ## Contribution
 

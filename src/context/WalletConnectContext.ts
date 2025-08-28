@@ -1,7 +1,7 @@
+import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { createContext } from 'react';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { SupportedWallets } from '../wallets';
-import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];

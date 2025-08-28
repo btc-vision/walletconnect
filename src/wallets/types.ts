@@ -1,5 +1,5 @@
-import { SupportedWallets } from './index';
 import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { SupportedWallets } from './index';
 export type { AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {

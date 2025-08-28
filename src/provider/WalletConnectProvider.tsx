@@ -1,23 +1,23 @@
+import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
+import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
+import '../utils/style.css';
+import '../utils/theme.css';
 import { SupportedWallets, WalletController } from '../wallets';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
     ControllerResponse,
-    WalletConnectWallet
+    WalletConnectWallet,
 } from '../wallets/types.ts';
-import '../utils/theme.css';
-import '../utils/style.css';
-import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
-import { DefaultWalletConnectNetwork } from '../consts';
-import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
 interface WalletConnectProviderProps {
     theme?: 'light' | 'dark' | 'moto';
-    children: ReactNode,
+    children: ReactNode;
 }
 
 const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, children }) => {
@@ -26,16 +26,16 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
     const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
 
-    const [supportedWallets ] = useState<WalletConnectWallet[]>(WalletController.getWallets);
+    const [supportedWallets] = useState<WalletConnectWallet[]>(WalletController.getWallets);
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
-        () => localStorage.getItem('WC_SelectedWallet') as SupportedWallets || null
+        () => (localStorage.getItem('WC_SelectedWallet') as SupportedWallets) || null,
     );
     const [connecting, setConnecting] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
-    const [walletType, setWalletType] = useState<SupportedWallets|null>(null);
+    const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
     const [provider, setProvider] = useState<Unisat | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
 
@@ -61,7 +61,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     };
 
     const disconnect = useCallback(async () => {
-        console.log("DISCONNECTING FROM WALLET")
+        console.log('DISCONNECTING FROM WALLET');
         localStorage.removeItem('WC_SelectedWallet');
         setSelectedWallet(null);
         setPublicKey(null);
@@ -78,8 +78,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         async (wallet: SupportedWallets) => {
             setConnecting(true);
             try {
-                const response: ControllerResponse<ControllerConnectAccounts | ControllerErrorResponse> =
-                    await WalletController.connect(wallet);
+                const response: ControllerResponse<
+                    ControllerConnectAccounts | ControllerErrorResponse
+                > = await WalletController.connect(wallet);
 
                 if (response.code === 200 && Array.isArray(response.data)) {
                     if (!response.data || response.data.length === 0) {
@@ -91,7 +92,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                     const network = await WalletController.getNetwork();
                     setNetwork(network);
 
-                    WalletController.setAccountsChangedHook(accountsChanged)
+                    WalletController.setAccountsChangedHook(accountsChanged);
                     WalletController.setChainChangedHook(chainChanged);
                     WalletController.setDisconnectHook(disconnect);
 
@@ -103,7 +104,6 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 } else {
                     setConnectError('Unknown error');
                 }
-
             } catch (err: unknown) {
                 setConnectError((err as Error).message || 'Unexpected error');
             } finally {
@@ -111,7 +111,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
             }
         },
         // eslint-disable-next-line
-        [disconnect]
+        [disconnect],
     );
 
     const attemptReconnect = useCallback(async () => {
@@ -120,7 +120,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
         // Ensure we can connect without launching modal popup windows!
         const canAutoConnect = await WalletController.canAutoConnect(selectedWallet);
-        console.log("CanAutoConnect", canAutoConnect);
+        console.log('CanAutoConnect', canAutoConnect);
         if (!canAutoConnect) return;
 
         let attempts = 0;
@@ -128,7 +128,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         const reconnect = async () => {
             attempts++;
 
-            const walletAvailable = WalletController.isWalletInstalled(selectedWallet)
+            const walletAvailable = WalletController.isWalletInstalled(selectedWallet);
             if (walletAvailable) {
                 console.log(`Attempting to reconnect to ${selectedWallet} (Attempt ${attempts})`);
                 await connectToWallet(selectedWallet);
@@ -149,15 +149,16 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     }, [attemptReconnect]);
 
     const accountsChanged = useCallback(
-        async (accounts:string[])=> {
-            console.log("Accounts", accounts)
+        async (accounts: string[]) => {
+            console.log('Accounts', accounts);
             if (selectedWallet) {
                 const account = accounts.length > 0 ? accounts[0] : null;
-                setWalletAddress(account)
+                setWalletAddress(account);
                 const publicKey = account ? await WalletController.getPublicKey() : null;
                 setPublicKey(publicKey);
             }
-        }, [selectedWallet, setWalletAddress, setPublicKey]
+        },
+        [selectedWallet, setWalletAddress, setPublicKey],
     );
 
     const chainChanged = useCallback(
@@ -165,28 +166,29 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
             if (selectedWallet) {
                 setNetwork(network);
             }
-        }, [selectedWallet, setNetwork]
+        },
+        [selectedWallet, setNetwork],
     );
 
     const allWallets = useMemo(() => {
         //console.log("Refreshing all wallets");
         return supportedWallets.map((wallet): WalletInformation => {
             //console.log(" --> ", wallet.name, wallet.controller.isInstalled(), wallet.controller.isConnected());
-            return  {
+            return {
                 name: wallet.name,
                 icon: wallet.icon,
                 isInstalled: wallet.controller.isInstalled(),
                 isConnected: wallet.controller.isConnected(),
-            }
-        })
+            };
+        });
         // eslint-disable-next-line
     }, [supportedWallets, network]);
 
     const availableWallets = useMemo(() => {
-        return supportedWallets.filter(wallet => wallet.controller.isInstalled())
+        return supportedWallets.filter((wallet) => wallet.controller.isInstalled());
         //return supportedWallets
         // eslint-disable-next-line
-    }, [supportedWallets, network])
+    }, [supportedWallets, network]);
 
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
@@ -198,8 +200,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     useEffect(() => {
         const updateSigner = async () => {
             const signer = publicKey ? await WalletController.getSigner() : null;
-            setSigner(signer)
-        }
+            setSigner(signer);
+        };
         void updateSigner();
     }, [network, publicKey]);
 
@@ -210,13 +212,24 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
     const address = useMemo(() => {
         return publicKey ? Address.fromString(publicKey) : null;
-    }, [publicKey])
+    }, [publicKey]);
 
     return (
         <WalletConnectContext.Provider
-            value={{ walletAddress, publicKey, address, connecting, connectToWallet,
-                disconnect, openConnectModal, network, allWallets,
-                provider, signer, walletType }}>
+            value={{
+                walletAddress,
+                publicKey,
+                address,
+                connecting,
+                connectToWallet,
+                disconnect,
+                openConnectModal,
+                network,
+                allWallets,
+                provider,
+                signer,
+                walletType,
+            }}>
             {children}
             {modalOpen && (
                 <div className={`wallet-connect-modal-backdrop ${currentTheme}`}>
@@ -227,7 +240,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                         aria-labelledby="wallet-connect-modal-title">
                         <div className="wallet-connect-header">
                             <span>Connect Wallet</span>
-                            <button className="close" onClick={() => closeConnectModal()}>
+                            <button
+                                className="close"
+                                onClick={() => closeConnectModal()}>
                                 <span className="close-icon">
                                     <svg
                                         width="30px"
@@ -258,26 +273,36 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                         key={wallet.name}
                                         onClick={() => connectToWallet(wallet.name)}
                                         disabled={connecting || !wallet.controller.isInstalled()}
-                                        className={`wallet-button ${wallet.controller.isInstalled() ? "wallet-installed" : "wallet-not-installed"}`}>
-                                        {wallet.icon
-                                        ?
-                                            <div className="wallet-icon" title={wallet.name}>
-                                                <img src={wallet.icon} alt={wallet.name} />
+                                        className={`wallet-button ${
+                                            wallet.controller.isInstalled()
+                                                ? 'wallet-installed'
+                                                : 'wallet-not-installed'
+                                        }`}>
+                                        {wallet.icon ? (
+                                            <div
+                                                className="wallet-icon"
+                                                title={wallet.name}>
+                                                <img
+                                                    src={wallet.icon}
+                                                    alt={wallet.name}
+                                                />
                                             </div>
-                                        :
-                                            <div className="wallet-name">
-                                                {wallet.name}
-                                            </div>
-                                        }
+                                        ) : (
+                                            <div className="wallet-name">{wallet.name}</div>
+                                        )}
 
-                                        {wallet.controller.isConnected()
-                                            ? (<div className="wallet-connected">(Connected)</div>)
-                                            : (<></>)
-                                        }
-                                        {wallet.controller.isInstalled()
-                                            ? (<></>)
-                                            : (<div className="wallet-not-installed">(Not Installed)</div>)
-                                        }
+                                        {wallet.controller.isConnected() ? (
+                                            <div className="wallet-connected">(Connected)</div>
+                                        ) : (
+                                            <></>
+                                        )}
+                                        {wallet.controller.isInstalled() ? (
+                                            <></>
+                                        ) : (
+                                            <div className="wallet-not-installed">
+                                                (Not Installed)
+                                            </div>
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -287,17 +312,20 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                 <p>Supporting the following wallets</p>
                                 <div className="wallet-list">
                                     {supportedWallets.map((wallet) => (
-                                        <a href={`https://chromewebstore.google.com/search/${wallet.name}`}>
-                                            {wallet.icon
-                                                ?
-                                                <div className="wallet-icon" title={wallet.name}>
-                                                    <img src={wallet.icon} alt={wallet.name} />
+                                        <a
+                                            href={`https://chromewebstore.google.com/search/${wallet.name}`}>
+                                            {wallet.icon ? (
+                                                <div
+                                                    className="wallet-icon"
+                                                    title={wallet.name}>
+                                                    <img
+                                                        src={wallet.icon}
+                                                        alt={wallet.name}
+                                                    />
                                                 </div>
-                                                :
-                                                <div className="wallet-name">
-                                                    {wallet.name}
-                                                </div>
-                                            }
+                                            ) : (
+                                                <div className="wallet-name">{wallet.name}</div>
+                                            )}
                                         </a>
                                     ))}
                                 </div>
