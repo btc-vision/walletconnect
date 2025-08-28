@@ -23,7 +23,7 @@ Old version            -->      New version
     connect                         connectToWallet
     disconnect                      disconnect
     walletType                      walletType
-    walletWindowInstance            provider
+    walletWindowInstance            walletInstance
     account                         -
       - isConnected                 publicKey != null
       - signer                      signer
@@ -32,7 +32,7 @@ Old version            -->      New version
                                     walletAddress (account address)
       - addressTyped
       - network                     network
-      - provider                    -
+      - provider                    provider
                                     connecting
 } = useWallet()                 } = useWalletConnect()
 ```
