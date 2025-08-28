@@ -1,4 +1,0 @@
-  Fix autoreconnect when not needed (just after connecting)
-v Add isConnected
-v Disconnect old wallet when switching to new one
-

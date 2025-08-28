@@ -1,23 +1,23 @@
+import { Network, networks } from '@btc-vision/bitcoin';
+import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { DefaultWalletConnectNetwork } from '../consts';
+import { WalletConnectNetwork } from '../types';
+import { _e } from '../utils/accessibility/errorDecoder';
+import { SupportedWallets } from './index';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
     ControllerResponse,
     WalletConnectWallet,
 } from './types.ts';
-import { _e } from '../utils/accessibility/errorDecoder';
-import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
-import { SupportedWallets } from './index';
-import { Network, networks } from '@btc-vision/bitcoin';
-import { DefaultWalletConnectNetwork } from '../consts';
-import { WalletConnectNetwork } from '../types';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
     static getWallets = () => {
-        return [...(WalletController.wallets.values())];
-    }
+        return [...WalletController.wallets.values()];
+    };
     static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
     }
@@ -31,7 +31,7 @@ class WalletController {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = wallet.controller.getProvider()
+        const provider = wallet.controller.getProvider();
         return provider ? new Proxy(provider, {}) : null;
     }
 
@@ -40,7 +40,7 @@ class WalletController {
         if (!wallet) {
             return null;
         }
-        return await wallet.controller.getSigner()
+        return await wallet.controller.getSigner();
     }
 
     //TODO: check if we really want to return a default network here
@@ -48,7 +48,7 @@ class WalletController {
     static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork {
         const walletNetwork = (network: Network): WalletConnectNetwork => {
             return { ...network, chainType: chainType };
-        }
+        };
         switch (chainType) {
             case UnisatChainType.BITCOIN_REGTEST:
                 return walletNetwork(networks.regtest);
@@ -72,8 +72,8 @@ class WalletController {
             return DefaultWalletConnectNetwork;
         }
 
-        const chainType = await wallet.controller.getNetwork()
-        return this.convertChainTypeToNetwork(chainType)
+        const chainType = await wallet.controller.getNetwork();
+        return this.convertChainTypeToNetwork(chainType);
     }
 
     static async getPublicKey(): Promise<string | null> {
@@ -86,19 +86,19 @@ class WalletController {
 
     static async canAutoConnect(walletName: string) {
         const wallet = this.wallets.get(walletName);
-        return wallet && await wallet.controller.canAutoConnect() || false
+        return (wallet && (await wallet.controller.canAutoConnect())) || false;
     }
 
     static async connect(
-        walletName: string
+        walletName: string,
     ): Promise<ControllerResponse<ControllerConnectAccounts | ControllerErrorResponse>> {
         const wallet = this.wallets.get(walletName);
         if (!wallet) {
             return {
                 code: 404,
                 data: {
-                    message: _e('Wallet not found')
-                }
+                    message: _e('Wallet not found'),
+                },
             };
         }
         try {
@@ -107,14 +107,14 @@ class WalletController {
             this.currentWallet = wallet;
             return {
                 code: 200,
-                data: accounts
+                data: accounts,
             };
         } catch (error) {
             return {
                 code: 499,
                 data: {
-                    message: _e((error as Error)?.message || error as string)
-                }
+                    message: _e((error as Error)?.message || (error as string)),
+                },
             };
         }
     }
@@ -169,8 +169,8 @@ class WalletController {
             return;
         }
         try {
-            wallet.controller.removeChainChangedHook()
-            wallet.controller.setChainChangedHook((chainType:UnisatChainType) => {
+            wallet.controller.removeChainChangedHook();
+            wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
                 fn(this.convertChainTypeToNetwork(chainType));
             });
         } catch (error) {
@@ -219,7 +219,7 @@ class WalletController {
 
     static registerWallet = (wallet: WalletConnectWallet): void => {
         this.wallets.set(wallet.name, wallet);
-    }
+    };
 
     static unbindHooks(): void {
         this.removeDisconnectHook();
