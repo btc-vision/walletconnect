@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
@@ -9,7 +9,6 @@
     },
     "exports": {
         ".": {
-            "browser": "./browser/index.js",
             "import": "./build/index.js",
             "require": "./build/index.js",
             "types": "./build/index.d.ts"
@@ -60,6 +59,7 @@
         "watch": "gulp watch",
         "build": "gulp build",
         "setup": "npm i && npm run build",
+        "lint": "eslint .",
         "browserBuild": "webpack --mode production"
     },
     "peerDependencies": {
@@ -71,6 +71,8 @@
         "@babel/preset-react": "^7.27.1",
         "@babel/preset-typescript": "^7.27.1",
         "@types/react": "^19.1.12",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "eslint-plugin-react-refresh": "^0.4.20",
         "gulp": "^5.0.1",
         "gulp-cached": "^1.1.1",
         "gulp-typescript": "^6.0.0-alpha.1",
@@ -87,10 +89,13 @@
         "@btc-vision/bitcoin": "^6.4.8",
         "@btc-vision/transaction": "^1.6.8",
         "@eslint/js": "^9.34.0",
+        "css-loader": "^7.1.2",
+        "eslint-plugin-react-hooks": "^5.2.0",
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.4.0",
         "gulp-logger-new": "^1.0.1",
         "opnet": "^1.6.17",
+        "style-loader": "^4.0.0",
         "webpack": "^5.101.3"
     }
 }
