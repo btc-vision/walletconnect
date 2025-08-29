@@ -1,11 +1,11 @@
-import { Address, Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import '../utils/style.css';
 import '../utils/theme.css';
-import { SupportedWallets, WalletController } from '../wallets';
+import { type SupportedWallets, WalletController } from '../wallets';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
