@@ -6,20 +6,24 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-    { ignores: ['dist'] },
+    { ignores: ['dist', 'browser', 'build'] },
     {
-        extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.strictTypeChecked],
+        extends: [
+            eslint.configs.recommended,
+            ...tseslint.configs.recommended,
+            ...tseslint.configs.strictTypeChecked,
+        ],
         files: ['**/*.{ts,tsx}'],
         languageOptions: {
             ecmaVersion: 2023,
             parserOptions: {
                 projectService: true,
-                tsconfigDirName: import.meta.dirname
-            }
+                tsconfigDirName: import.meta.dirname,
+            },
         },
         plugins: {
             'react-hooks': reactHooks,
-            'react-refresh': reactRefresh
+            'react-refresh': reactRefresh,
         },
         rules: {
             ...reactHooks.configs.recommended.rules,
@@ -45,11 +49,11 @@ export default tseslint.config(
             '@typescript-eslint/no-unsafe-assignment': 'off',
             '@typescript-eslint/no-unsafe-call': 'off',
             '@typescript-eslint/no-unsafe-member-access': 'off',
-            '@typescript-eslint/no-unsafe-argument': 'off'
-        }
+            '@typescript-eslint/no-unsafe-argument': 'off',
+        },
     },
     {
         files: ['**/*.js'],
-        ...tseslint.configs.disableTypeChecked
-    }
+        ...tseslint.configs.disableTypeChecked,
+    },
 );

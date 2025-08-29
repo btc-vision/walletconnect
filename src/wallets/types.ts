@@ -1,12 +1,14 @@
-import { SupportedWallets } from './index';
-import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
-export type { AbstractRpcProvider } from 'opnet';
+import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { type SupportedWallets } from './index';
+import { AbstractRpcProvider } from 'opnet'
+export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
     isInstalled(): boolean;
     isConnected(): boolean;
     canAutoConnect(): Promise<boolean>;
-    getProvider(): Unisat | null;
+    getWalletInstance(): Unisat | null;
+    getProvider(): Promise<AbstractRpcProvider | null>;
     getSigner(): Promise<UnisatSigner | null>;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;

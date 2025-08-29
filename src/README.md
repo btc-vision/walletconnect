@@ -1,5 +1,7 @@
 # WalletConnect
+
 WalletConnect is a library that allows you to connect to various wallets and manage your accounts and transactions. It provides a unified interface for interacting with different wallets, making it easier to build applications that require wallet integration.
+
 ## Adding a wallet
 
 To add a wallet, you must start by creating a new directory in the `/WalletConnect/src/wallets` directory.
@@ -12,14 +14,11 @@ Once you have created the controller class, you will need to add its name to the
 import { WalletController } from './controller.ts';
 import myWallet from './mywallet/controller.ts';
 
-type SupportedWallets
-    = "OP_WALLET"
-    | "UNISAT"
-    | "My Wallet"
+type SupportedWallets = 'OP_WALLET' | 'UNISAT' | 'My Wallet';
 
 WalletController.registerWallet({
     name: 'My Wallet',
     icon: '',
-    controller: new myWallet() // Class that you have created
+    controller: new myWallet(), // Class that you have created
 });
 ```

@@ -1,5 +1,5 @@
-import { patternMap, patternRegExp } from './patterns';
 import type { ErrorTranslations } from './patterns';
+import { patternMap, patternRegExp } from './patterns';
 
 // Sample: Error in calling function: Spender can not be dead at ~lib/@btc-vision/btc-runtime/runtime/contracts/DeployableOP_20.ts:291:50
 // matches[2] == null
@@ -7,7 +7,10 @@ import type { ErrorTranslations } from './patterns';
 // Sample: Error in calling function: NATIVE_SWAP: LOCKED at ~lib/@btc-vision/btc-runtime/runtime/contracts/DeployableOP_20.ts:291:50
 // matches[2] == 'NATIVE_SWAP'
 // matches[3] == 'LOCKED'
-const RE_EXTRACT_ERROR = new RegExp('^(.*?):\\s*(?:([^:]+):)?\\s*(.*?)\\s+at\\s(\\S+\\s\\()?\\S+\\d+:\\d+\\)?', 'm');
+const RE_EXTRACT_ERROR = new RegExp(
+    '^(.*?):\\s*(?:([^:]+):)?\\s*(.*?)\\s+at\\s(\\S+\\s\\()?\\S+\\d+:\\d+\\)?',
+    'm',
+);
 
 const _translation = (err: ErrorTranslations, locale: string | null) => {
     // Using a switch here to be sure we are safe as to not try to use
@@ -22,7 +25,8 @@ const _translation = (err: ErrorTranslations, locale: string | null) => {
             return err['fr'] || '';
         case 'fr-ca':
             return err['fr-CA'] || '';
-        default: return '';
+        default:
+            return '';
     }
 };
 

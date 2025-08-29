@@ -1,6 +1,8 @@
-import type { WalletBase } from '../types.ts';
-import type { OPWalletInterface } from './interface';
-import { Unisat, UnisatChainInfo, UnisatChainType } from '@btc-vision/transaction';
+import { type Unisat, type UnisatChainInfo, UnisatChainType } from '@btc-vision/transaction';
+import { type WalletBase } from '../types';
+import { type OPWalletInterface } from './interface';
+import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
+import { networks } from '@btc-vision/bitcoin';
 
 interface OPWalletWindow extends Window {
     opnet?: OPWalletInterface;
@@ -25,7 +27,7 @@ class OPWallet implements WalletBase {
     async canAutoConnect(): Promise<boolean> {
         // getAccounts returns empty array if not connected,
         // without launching connection modal window.
-        const accounts = await this.walletBase?.getAccounts() || []
+        const accounts = (await this.walletBase?.getAccounts()) || [];
         return accounts.length > 0;
     }
 
@@ -38,8 +40,8 @@ class OPWallet implements WalletBase {
             throw new Error(notInstalledError);
         }
         return this.walletBase.requestAccounts().then((accounts: string[]) => {
-            this._isConnected = accounts.length > 0
-            return accounts
+            this._isConnected = accounts.length > 0;
+            return accounts;
         });
     }
 
@@ -47,13 +49,32 @@ class OPWallet implements WalletBase {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
-        return this._isConnected ? await this.walletBase.disconnect().then(() => {
-            this._isConnected = false;
-        }) : undefined;
+        return this._isConnected
+            ? await this.walletBase.disconnect().then(() => {
+                  this._isConnected = false;
+              })
+            : undefined;
     }
 
-    getProvider(): Unisat | null {
-        return this._isConnected && this.walletBase || null;
+    getWalletInstance(): Unisat | null {
+        return (this._isConnected && this.walletBase) || null;
+    }
+
+    public async getProvider(): Promise<AbstractRpcProvider | null> {
+        if (!this._isConnected || !this.walletBase) return null;
+
+        const chain = await this.walletBase.getChain();
+        switch (chain.enum) {
+            case UnisatChainType.BITCOIN_MAINNET:
+                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+            case UnisatChainType.BITCOIN_TESTNET:
+                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+            case UnisatChainType.BITCOIN_REGTEST:
+                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+            // TODO: Add Fractal Mainnet & Testnet when available
+            default:
+                return null;
+        }
     }
 
     async getSigner(): Promise<null> {
@@ -77,7 +98,7 @@ class OPWallet implements WalletBase {
             throw new Error('Failed to retrieve chain information');
         }
 
-        return chainInfo.enum
+        return chainInfo.enum;
     }
 
     setAccountsChangedHook(fn: (accounts: string[]) => void): void {
@@ -93,9 +114,13 @@ class OPWallet implements WalletBase {
             if (accounts.length > 0) {
                 fn(accounts);
             } else {
-                console.log('OPWallet Account Changed Hook --> Disconnect', accounts.length, !!this.disconnectHookWrapper);
+                console.log(
+                    'OPWallet Account Changed Hook --> Disconnect',
+                    accounts.length,
+                    !!this.disconnectHookWrapper,
+                );
                 this._isConnected = false;
-                this.disconnectHookWrapper?.()
+                this.disconnectHookWrapper?.();
             }
         };
 
