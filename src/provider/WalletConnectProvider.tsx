@@ -12,6 +12,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from '../wallets/types.ts';
+import { AbstractRpcProvider } from 'opnet';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -36,7 +37,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
-    const [provider, setProvider] = useState<Unisat | null>(null);
+    const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
+    const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
 
     const clearConnectError = useCallback(() => {
@@ -193,9 +195,17 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
         setWalletType(walletType);
-        const provider = walletAddress ? WalletController.getProvider() : null;
-        setProvider(provider);
+        const walletInstance = walletAddress ? WalletController.getWalletInstance() : null;
+        setWalletInstance(walletInstance);
     }, [walletAddress]);
+
+    useEffect(() => {
+        const updateWalletInfo = async () => {
+            const provider = walletAddress ? (await WalletController.getProvider()) : null;
+            setProvider(provider);
+        }
+        void updateWalletInfo();
+    }, [walletAddress,network]);
 
     useEffect(() => {
         const updateSigner = async () => {
@@ -226,6 +236,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 openConnectModal,
                 network,
                 allWallets,
+                walletInstance,
                 provider,
                 signer,
                 walletType,

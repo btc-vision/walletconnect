@@ -1,6 +1,8 @@
 import { Unisat, UnisatChainInfo, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import type { WalletBase } from '../types.ts';
 import type { UnisatWalletInterface } from './interface';
+import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
+import { networks } from '@btc-vision/bitcoin';
 
 interface UnisatWalletWindow extends Window {
     unisat?: UnisatWalletInterface;
@@ -29,8 +31,25 @@ class UnisatWallet implements WalletBase {
         return accounts.length > 0;
     }
 
-    getProvider(): Unisat | null {
+    getWalletInstance(): Unisat | null {
         return (this._isConnected && this.walletBase) || null;
+    }
+
+    public async getProvider(): Promise<AbstractRpcProvider | null> {
+        if (!this._isConnected || !this.walletBase) return null;
+
+        const chain = await this.walletBase.getChain();
+        switch (chain.enum) {
+            case UnisatChainType.BITCOIN_MAINNET:
+                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+            case UnisatChainType.BITCOIN_TESTNET:
+                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+            case UnisatChainType.BITCOIN_REGTEST:
+                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+            // TODO: Add Fractal Mainnet & Testnet when available
+            default:
+                return null;
+        }
     }
 
     async getSigner(): Promise<UnisatSigner> {

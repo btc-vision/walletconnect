@@ -10,6 +10,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from './types.ts';
+import { AbstractRpcProvider } from 'opnet';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -25,13 +26,23 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getProvider(): Unisat | null {
+    static getWalletInstance(): Unisat | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = wallet.controller.getProvider();
+        const walletInstance = wallet.controller.getWalletInstance();
+        return walletInstance ? new Proxy(walletInstance, {}) : null;
+    }
+
+    static async getProvider(): Promise<AbstractRpcProvider | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        // Needs to return a Proxy to be sure useEffects are triggered
+        const provider = await wallet.controller.getProvider()
         return provider ? new Proxy(provider, {}) : null;
     }
 
