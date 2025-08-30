@@ -1,9 +1,9 @@
-import { Network, networks } from '@btc-vision/bitcoin';
-import { Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { type Network, networks } from '@btc-vision/bitcoin';
+import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import { DefaultWalletConnectNetwork } from '../consts';
-import { WalletConnectNetwork } from '../types';
+import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
-import { SupportedWallets } from './index';
+import { type SupportedWallets } from './index';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
@@ -57,16 +57,16 @@ class WalletController {
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
     static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork {
-        const walletNetwork = (network: Network): WalletConnectNetwork => {
-            return { ...network, chainType: chainType };
+        const walletNetwork = (network: Network, name:string): WalletConnectNetwork => {
+            return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
             case UnisatChainType.BITCOIN_REGTEST:
-                return walletNetwork(networks.regtest);
+                return walletNetwork(networks.regtest, 'regtest');
             case UnisatChainType.BITCOIN_TESTNET:
-                return walletNetwork(networks.testnet);
+                return walletNetwork(networks.testnet, 'testnet');
             case UnisatChainType.BITCOIN_MAINNET:
-                return walletNetwork(networks.bitcoin);
+                return walletNetwork(networks.bitcoin, 'mainnet');
 
             case UnisatChainType.BITCOIN_TESTNET4:
             case UnisatChainType.BITCOIN_SIGNET:
