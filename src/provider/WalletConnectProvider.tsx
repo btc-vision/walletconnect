@@ -1,4 +1,5 @@
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -12,7 +13,6 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from '../wallets/types.ts';
-import { AbstractRpcProvider } from 'opnet';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -201,11 +201,11 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
     useEffect(() => {
         const updateWalletInfo = async () => {
-            const provider = walletAddress ? (await WalletController.getProvider()) : null;
+            const provider = walletAddress ? await WalletController.getProvider() : null;
             setProvider(provider);
-        }
+        };
         void updateWalletInfo();
-    }, [walletAddress,network]);
+    }, [walletAddress, network]);
 
     useEffect(() => {
         const updateSigner = async () => {

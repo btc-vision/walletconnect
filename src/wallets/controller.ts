@@ -1,5 +1,6 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
 import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { AbstractRpcProvider } from 'opnet';
 import { DefaultWalletConnectNetwork } from '../consts';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
@@ -10,7 +11,6 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from './types.ts';
-import { AbstractRpcProvider } from 'opnet';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -42,7 +42,7 @@ class WalletController {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = await wallet.controller.getProvider()
+        const provider = await wallet.controller.getProvider();
         return provider ? new Proxy(provider, {}) : null;
     }
 
@@ -57,7 +57,7 @@ class WalletController {
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
     static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork {
-        const walletNetwork = (network: Network, name:string): WalletConnectNetwork => {
+        const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
