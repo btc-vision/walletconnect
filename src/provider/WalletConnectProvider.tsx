@@ -22,6 +22,7 @@ interface WalletConnectProviderProps {
 }
 
 const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, children }) => {
+    const [pageLoaded, setPageLoaded] = useState<boolean>(false);
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,6 +45,21 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => setConnectError(undefined), 5000);
+    }, []);
+
+    // This will run one time after the component mounts
+    useEffect(() => {
+        // callback function to call when event triggers
+        const onPageLoad = () => {
+            setPageLoaded(true);
+        }
+
+        if (document.readyState === 'complete') {
+            onPageLoad();
+        } else {
+            window.addEventListener('load', onPageLoad, false);
+            return () => window.removeEventListener('load', onPageLoad);
+        }
     }, []);
 
     useEffect(() => {
@@ -144,7 +160,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
         await reconnect();
         // eslint-disable-next-line
-    }, [selectedWallet, connectToWallet]);
+    }, [selectedWallet, connectToWallet, pageLoaded]);
 
     useEffect(() => {
         void attemptReconnect();
@@ -184,13 +200,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
             };
         });
         // eslint-disable-next-line
-    }, [supportedWallets, network]);
+    }, [supportedWallets, network, pageLoaded]);
 
     const availableWallets = useMemo(() => {
         return supportedWallets.filter((wallet) => wallet.controller.isInstalled());
         //return supportedWallets
         // eslint-disable-next-line
-    }, [supportedWallets, network]);
+    }, [supportedWallets, network, pageLoaded]);
 
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
@@ -317,7 +333,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                     </button>
                                 ))}
                             </div>
-                        ) : (
+                        ) : pageLoaded ? (
                             <div>
                                 <p>No wallets available</p>
                                 <p>Supporting the following wallets</p>
@@ -340,6 +356,11 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                         </a>
                                     ))}
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="wallet-waiting-plugin">
+                                <p>Loading plugins...</p>
+                                <p>Please wait</p>
                             </div>
                         )}
                     </div>

@@ -114,6 +114,10 @@ div.wallet-not-installed {
     padding: 10px;
     font-size: medium;
 }
+div.wallet-waiting-plugin {
+    padding: 10px;
+    font-size: medium;
+}
 
 .wallet-connect-error {
     padding: 16px 16px 0;
