@@ -52,7 +52,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         // callback function to call when event triggers
         const onPageLoad = () => {
             setPageLoaded(true);
-        }
+        };
 
         if (document.readyState === 'complete') {
             onPageLoad();
