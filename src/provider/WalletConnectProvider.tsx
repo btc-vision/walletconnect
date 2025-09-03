@@ -17,7 +17,7 @@ import { AbstractRpcProvider } from 'opnet';
 const AUTO_RECONNECT_RETRIES = 5;
 
 interface WalletConnectProviderProps {
-    theme?: 'light' | 'dark' | 'moto';
+    theme?: 'light' | 'dark' | 'moto' | 'none';
     supportedWallets?: SupportedWallets[];
     recommendedWallet?: SupportedWallets;
     children: ReactNode;

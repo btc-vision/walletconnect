@@ -1,26 +1,26 @@
 .wallet-connect-light-theme {
-    --background-color: #fafafa;
-    --primaryColor: #000000;
-    --border-color: #bbbbbb;
+    --wallet-connect-background-color: #fafafa;
+    --wallet-connect-primaryColor: #000000;
+    --wallet-connect-border-color: #bbbbbb;
 
-    --button-background-color: #ffffff;
-    --icon-filter: invert(1) hue-rotate(180deg) !important;
+    --wallet-connect-button-background-color: #ffffff;
+    --wallet-connect-icon-filter: invert(1) hue-rotate(180deg) !important;
 }
 
 .wallet-connect-dark-theme {
-    --background-color: #1e1e1e;
-    --primaryColor: #ffffff;
-    --border-color: #333333;
+    --wallet-connect-background-color: #1e1e1e;
+    --wallet-connect-primaryColor: #ffffff;
+    --wallet-connect-border-color: #333333;
 
-    --button-background-color: #2a2a2a;
-    --icon-filter: unset;
+    --wallet-connect-button-background-color: #2a2a2a;
+    --wallet-connect-icon-filter: unset;
 }
 
 .wallet-connect-moto-theme {
-    --background-color: #171239;
-    --primaryColor: #9698e2;
-    --border-color: #201b4e;
+    --wallet-connect-background-color: #171239;
+    --wallet-connect-primaryColor: #9698e2;
+    --wallet-connect-border-color: #201b4e;
 
-    --button-background-color: #140932;
-    --icon-filter: unset;
+    --wallet-connect-button-background-color: #140932;
+    --wallet-connect-icon-filter: unset;
 }

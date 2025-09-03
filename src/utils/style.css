@@ -13,9 +13,9 @@
 }
 
 .wallet-connect-modal {
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
-    color: var(--primaryColor);
+    background-color: var(--wallet-connect-background-color);
+    border: 1px solid var(--wallet-connect-border-color);
+    color: var(--wallet-connect-primaryColor);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 400px;
@@ -25,7 +25,7 @@
 
 .wallet-connect-header {
     padding: 16px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--wallet-connect-border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -40,9 +40,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primaryColor);
-    fill: var(--primaryColor);
-    background-color: var(--background-color);
+    color: var(--wallet-connect-primaryColor);
+    fill: var(--wallet-connect-primaryColor);
+    background-color: var(--wallet-connect-background-color);
     cursor: pointer;
 }
 .wallet-connect-header > button.close:hover {
@@ -54,7 +54,7 @@
 }
 
 .wallet-connect-header > button.close .close-x-path {
-    stroke: var(--primaryColor);
+    stroke: var(--wallet-connect-primaryColor);
     transition: stroke 0.2s ease;
 }
 
@@ -82,8 +82,8 @@
     text-align: left;
     cursor: pointer;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background-color: var(--button-background-color);
+    border: 1px solid var(--wallet-connect-border-color);
+    background-color: var(--wallet-connect-button-background-color);
 }
 .wallet-list > button:disabled {
     opacity: 0.3;
@@ -99,7 +99,7 @@
 }
 .wallet-icon img {
     max-height: 32px;
-    filter: var(--icon-filter);
+    filter: var(--wallet-connect-icon-filter);
 }
 .wallet-name {
     font-size: x-large;
@@ -121,8 +121,8 @@ div.wallet-not-installed {
     padding: 10px;
     font-size: medium;
     border-radius: 10px;
-    border:1px solid var(--border-color);
-    background-color: var(--button-background-color)
+    border:1px solid var(--wallet-connect-border-color);
+    background-color: var(--wallet-connect-button-background-color)
 }
 div.wallet-not-installed .download-links {
     display: flex;
