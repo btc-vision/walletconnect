@@ -1,4 +1,5 @@
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -12,7 +13,6 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from '../wallets/types.ts';
-import { AbstractRpcProvider } from 'opnet';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -28,6 +28,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const { supportedWallets:  supportedWalletsName } = props;
     const { recommendedWallet:  recommendedWalletName } = props;
 
+    const [pageLoaded, setPageLoaded] = useState<boolean>(false);
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -51,6 +52,21 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => setConnectError(undefined), 5000);
+    }, []);
+
+    // This will run one time after the component mounts
+    useEffect(() => {
+        // callback function to call when event triggers
+        const onPageLoad = () => {
+            setPageLoaded(true);
+        };
+
+        if (document.readyState === 'complete') {
+            onPageLoad();
+        } else {
+            window.addEventListener('load', onPageLoad, false);
+            return () => window.removeEventListener('load', onPageLoad);
+        }
     }, []);
 
     useEffect(() => {
@@ -152,7 +168,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
         await reconnect();
         // eslint-disable-next-line
-    }, [selectedWallet, connectToWallet]);
+    }, [selectedWallet, connectToWallet, pageLoaded]);
 
     useEffect(() => {
         void attemptReconnect();
@@ -193,13 +209,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
             }
         });
         // eslint-disable-next-line
-    }, [supportedWallets, network]);
+    }, [supportedWallets, network, pageLoaded]);
 
     const availableWallets = useMemo(() => {
         return supportedWallets.filter((wallet) => wallet.controller.isInstalled());
         //return supportedWallets
         // eslint-disable-next-line
-    }, [supportedWallets, network]);
+    }, [supportedWallets, network, pageLoaded]);
 
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
@@ -210,11 +226,11 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
     useEffect(() => {
         const updateWalletInfo = async () => {
-            const provider = walletAddress ? (await WalletController.getProvider()) : null;
+            const provider = walletAddress ? await WalletController.getProvider() : null;
             setProvider(provider);
-        }
+        };
         void updateWalletInfo();
-    }, [walletAddress,network]);
+    }, [walletAddress, network]);
 
     useEffect(() => {
         const updateSigner = async () => {
@@ -324,7 +340,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                                     </button>
                                 ))}
                             </div>
-                        ) : (
+                        ) : pageLoaded ? (
                             <div>
                                 <p>No wallets available</p>
                                 <p>Supporting the following wallets</p>
@@ -347,6 +363,11 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                                         </a>
                                     ))}
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="wallet-waiting-plugin">
+                                <p>Loading plugins...</p>
+                                <p>Please wait</p>
                             </div>
                         )}
                         { modalContent

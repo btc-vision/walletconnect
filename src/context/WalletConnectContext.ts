@@ -1,8 +1,8 @@
 import { createContext, type ReactNode } from 'react';
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { type WalletConnectNetwork, type WalletInformation } from '../types';
-import { type SupportedWallets } from '../wallets';
 import { AbstractRpcProvider } from 'opnet';
+import { type SupportedWallets } from '../wallets';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];

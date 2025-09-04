@@ -1,8 +1,8 @@
+import { networks } from '@btc-vision/bitcoin';
 import { type Unisat, type UnisatChainInfo, UnisatChainType } from '@btc-vision/transaction';
+import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type OPWalletInterface } from './interface';
-import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
-import { networks } from '@btc-vision/bitcoin';
 
 interface OPWalletWindow extends Window {
     opnet?: OPWalletInterface;
