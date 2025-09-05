@@ -8,7 +8,7 @@ export interface WalletBase {
     isConnected(): boolean;
     canAutoConnect(): Promise<boolean>;
     getWalletInstance(): Unisat | null;
-    getProvider(): Promise<AbstractRpcProvider | null>;
+    getProvider(chainType: UnisatChainType): AbstractRpcProvider | null;
     getSigner(): Promise<UnisatSigner | null>;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;

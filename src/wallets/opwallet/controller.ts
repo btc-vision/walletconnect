@@ -60,11 +60,10 @@ class OPWallet implements WalletBase {
         return (this._isConnected && this.walletBase) || null;
     }
 
-    public async getProvider(): Promise<AbstractRpcProvider | null> {
+    getProvider(chainType: UnisatChainType): AbstractRpcProvider | null {
         if (!this._isConnected || !this.walletBase) return null;
 
-        const chain = await this.walletBase.getChain();
-        switch (chain.enum) {
+        switch (chainType) {
             case UnisatChainType.BITCOIN_MAINNET:
                 return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
             case UnisatChainType.BITCOIN_TESTNET:

@@ -93,6 +93,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         setPublicKey(null);
         setWalletAddress(null);
         setConnecting(false);
+        setWalletType(null);
+        setWalletInstance(null);
+        setProvider(null);
         WalletController.removeDisconnectHook();
         WalletController.removeChainChangedHook();
         WalletController.removeAccountsChangedHook();
@@ -112,11 +115,19 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                     if (!response.data || response.data.length === 0) {
                         return;
                     }
-                    setWalletAddress(response.data[0]);
+                    const walletType = WalletController.getWalletType()
+                    const walletInstance = WalletController.getWalletInstance();
+                    setWalletType(walletType);
+                    setWalletInstance(walletInstance);
+
                     const publicKey = await WalletController.getPublicKey();
-                    setPublicKey(publicKey);
                     const network = await WalletController.getNetwork();
+                    const provider = WalletController.getProvider(network.chainType);
+
+                    setWalletAddress(response.data[0]);
+                    setPublicKey(publicKey);
                     setNetwork(network);
+                    setProvider(provider)
 
                     WalletController.setAccountsChangedHook(accountsChanged);
                     WalletController.setChainChangedHook(chainChanged);
@@ -179,8 +190,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
             console.log('Accounts', accounts);
             if (selectedWallet) {
                 const account = accounts.length > 0 ? accounts[0] : null;
-                setWalletAddress(account);
                 const publicKey = account ? await WalletController.getPublicKey() : null;
+                setWalletAddress(account);
                 setPublicKey(publicKey);
             }
         },
@@ -190,7 +201,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const chainChanged = useCallback(
         (network: WalletConnectNetwork): void => {
             if (selectedWallet) {
+                const provider = WalletController.getProvider(network.chainType);
                 setNetwork(network);
+                setProvider(provider);
             }
         },
         [selectedWallet, setNetwork],
@@ -216,21 +229,6 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         //return supportedWallets
         // eslint-disable-next-line
     }, [supportedWallets, network, pageLoaded]);
-
-    useEffect(() => {
-        const walletType = walletAddress ? WalletController.getWalletType() : null;
-        setWalletType(walletType);
-        const walletInstance = walletAddress ? WalletController.getWalletInstance() : null;
-        setWalletInstance(walletInstance);
-    }, [walletAddress]);
-
-    useEffect(() => {
-        const updateWalletInfo = async () => {
-            const provider = walletAddress ? await WalletController.getProvider() : null;
-            setProvider(provider);
-        };
-        void updateWalletInfo();
-    }, [walletAddress, network]);
 
     useEffect(() => {
         const updateSigner = async () => {

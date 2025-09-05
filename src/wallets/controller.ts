@@ -39,13 +39,13 @@ class WalletController {
         return walletInstance ? new Proxy(walletInstance, {}) : null;
     }
 
-    static async getProvider(): Promise<AbstractRpcProvider | null> {
+    static getProvider(chainType: UnisatChainType): AbstractRpcProvider | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
-        const provider = await wallet.controller.getProvider();
+        const provider = wallet.controller.getProvider(chainType);
         return provider ? new Proxy(provider, {}) : null;
     }
 
