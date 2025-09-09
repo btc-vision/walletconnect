@@ -29,9 +29,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
 
     const [supportedWallets] = useState<WalletConnectWallet[]>(WalletController.getWallets);
-    const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
-        () => (localStorage.getItem('WC_SelectedWallet') as SupportedWallets) || null,
-    );
+    const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(null);
     const [connecting, setConnecting] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
@@ -59,6 +57,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         } else {
             window.addEventListener('load', onPageLoad, false);
             return () => window.removeEventListener('load', onPageLoad);
+        }
+    }, []);
+
+    useEffect(() => {
+        const savedWallet = localStorage.getItem('WC_SelectedWallet') as SupportedWallets;
+        if (savedWallet) {
+            setSelectedWallet(savedWallet);
         }
     }, []);
 
