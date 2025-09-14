@@ -70,7 +70,7 @@
         "@babel/preset-env": "^7.28.3",
         "@babel/preset-react": "^7.27.1",
         "@babel/preset-typescript": "^7.27.1",
-        "@types/react": "^19.1.12",
+        "@types/react": "^19.1.13",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.20",
         "gulp": "^5.0.1",
@@ -92,9 +92,9 @@
         "css-loader": "^7.1.2",
         "eslint-plugin-react-hooks": "^5.2.0",
         "gulp-clean": "^0.4.0",
-        "gulp-eslint-new": "^2.4.0",
+        "gulp-eslint-new": "^2.5.0",
         "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.6.31",
+        "opnet": "^1.6.34",
         "style-loader": "^4.0.0",
         "webpack": "^5.101.3"
     }
