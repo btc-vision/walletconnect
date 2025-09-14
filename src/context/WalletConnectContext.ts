@@ -9,7 +9,7 @@ export type WalletConnectContextType = {
     walletType: string | null;
     walletAddress: string | null;
     walletInstance: Unisat | null;
-    network: WalletConnectNetwork;
+    network: WalletConnectNetwork | null;
     publicKey: string | null;
     address: Address | null;
     openConnectModal: () => void;

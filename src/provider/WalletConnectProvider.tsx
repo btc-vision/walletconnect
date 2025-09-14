@@ -1,7 +1,6 @@
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
 import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
 import '../utils/style.css';
@@ -26,7 +25,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
+    const [network, setNetwork] = useState<WalletConnectNetwork | null>(null);
 
     const [supportedWallets] = useState<WalletConnectWallet[]>(WalletController.getWallets);
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(null);
@@ -94,7 +93,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         WalletController.removeChainChangedHook();
         WalletController.removeAccountsChangedHook();
         await WalletController.disconnect();
-        setNetwork(DefaultWalletConnectNetwork); // Triggers allWallets update after disconnecting
+        setNetwork(null);
     }, []);
 
     const connectToWallet = useCallback(
