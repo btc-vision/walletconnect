@@ -2,7 +2,7 @@ import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
-import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
+import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
 import '../utils/style.css';
 import '../utils/theme.css';
 import { type SupportedWallets, WalletController } from '../wallets';
@@ -38,6 +38,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -119,6 +120,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                     WalletController.setDisconnectHook(disconnect);
 
                     closeConnectModal();
+                    console.log('Connected to wallet:', wallet);
                     setSelectedWallet(wallet);
                     localStorage.setItem('WC_SelectedWallet', wallet);
                 } else if (response.data && 'message' in response.data) {
@@ -172,15 +174,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
 
     const accountsChanged = useCallback(
         async (accounts: string[]) => {
-            console.log('Accounts', accounts);
-            if (selectedWallet) {
-                const account = accounts.length > 0 ? accounts[0] : null;
-                setWalletAddress(account);
-                const publicKey = account ? await WalletController.getPublicKey() : null;
-                setPublicKey(publicKey);
-            }
+            console.log('Account changed, updating address');
+            const account = accounts.length > 0 ? accounts[0] : null;
+            setWalletAddress(account);
+            const publicKey = account ? await WalletController.getPublicKey() : null;
+            setPublicKey(publicKey);
         },
-        [selectedWallet, setWalletAddress, setPublicKey],
+        [setWalletAddress, setPublicKey],
     );
 
     const chainChanged = useCallback(
@@ -235,6 +235,23 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         void updateSigner();
     }, [network, publicKey]);
 
+    useEffect(() => {
+        const fetchBalance = async () => {
+            if (walletAddress && walletInstance) {
+                try {
+                    const balance = (await walletInstance.getBalance()) as WalletBalance | null;
+                    setWalletBalance(balance);
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
+                    setWalletBalance(null);
+                }
+            } else {
+                setWalletBalance(null);
+            }
+        };
+        void fetchBalance();
+    }, [walletAddress, walletInstance]);
+
     const currentTheme = useMemo(() => {
         const currentTheme = theme || 'light';
         return `wallet-connect-${currentTheme}-theme`;
@@ -259,6 +276,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 walletInstance,
                 provider,
                 signer,
+                walletBalance,
                 walletType,
             }}>
             {children}
