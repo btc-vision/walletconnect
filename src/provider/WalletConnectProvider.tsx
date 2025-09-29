@@ -1,4 +1,4 @@
-import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type Unisat, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -12,6 +12,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from '../wallets/types.ts';
+import type { Xverse } from '../wallets/xverse/interface';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -42,9 +43,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
-    const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
+    const [walletInstance, setWalletInstance] = useState<Unisat | Xverse | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
-    const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [signer, setSigner] = useState<UnisatSigner | XverseSigner | null>(null);
     const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const clearConnectError = useCallback(() => {
@@ -119,7 +120,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
                 if (response.code === 200 && Array.isArray(response.data)) {
                     if (!response.data || response.data.length === 0) {
-                        return;
+                        return false;
                     }
                     const walletType = WalletController.getWalletType()
                     const walletInstance = WalletController.getWalletInstance();
@@ -143,6 +144,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                     console.log('Connected to wallet:', wallet);
                     setSelectedWallet(wallet);
                     localStorage.setItem('WC_SelectedWallet', wallet);
+                    return true;
                 } else if (response.data && 'message' in response.data) {
                     setConnectError(response.data.message);
                 } else {
@@ -153,6 +155,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
             } finally {
                 setConnecting(false);
             }
+            return false;
         },
         // eslint-disable-next-line
         [disconnect],
@@ -204,9 +207,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     );
 
     const chainChanged = useCallback(
-        (network: WalletConnectNetwork): void => {
+        (network: WalletConnectNetwork|null): void => {
             console.log('Network changed, updating network', network);
-            const provider = WalletController.getProvider(network.chainType);
+            const provider = WalletController.getProvider(network?.chainType);
             setNetwork(network);
             setProvider(provider);
         },
@@ -246,7 +249,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         const fetchBalance = async () => {
             if (walletAddress && walletInstance) {
                 try {
-                    const balance = (await walletInstance.getBalance()) as WalletBalance | null;
+                    const balance = await WalletController.getBalance();
                     setWalletBalance(balance);
                 } catch (error) {
                     console.error('Error fetching balance:', error);

@@ -1,18 +1,21 @@
-import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
+import type { WalletBalance } from '../types';
+import type { Xverse } from './xverse/interface';
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
     isInstalled(): boolean;
     isConnected(): boolean;
     canAutoConnect(): Promise<boolean>;
-    getWalletInstance(): Unisat | null;
+    getWalletInstance(): Unisat | Xverse | null;
     getProvider(chainType: UnisatChainType): AbstractRpcProvider | null;
-    getSigner(): Promise<UnisatSigner | null>;
+    getSigner(): Promise<UnisatSigner | XverseSigner | null>;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
     getPublicKey(): Promise<string | null>;
+    getBalance(): Promise<WalletBalance>;
     getNetwork(): Promise<UnisatChainType>;
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;

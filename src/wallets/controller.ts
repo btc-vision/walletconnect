@@ -1,7 +1,7 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type WalletConnectNetwork } from '../types';
+import { type WalletBalance, type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
 import { type SupportedWallets } from './index';
 import type {
@@ -10,6 +10,7 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from './types.ts';
+import type { Xverse } from './xverse/interface';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -28,7 +29,7 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getWalletInstance(): Unisat | null {
+    static getWalletInstance(): Unisat | Xverse | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -38,9 +39,9 @@ class WalletController {
         return walletInstance ? new Proxy(walletInstance, {}) : null;
     }
 
-    static getProvider(chainType: UnisatChainType): AbstractRpcProvider | null {
+    static getProvider(chainType: UnisatChainType|undefined): AbstractRpcProvider | null {
         const wallet = this.currentWallet;
-        if (!wallet) {
+        if (!wallet || !chainType) {
             return null;
         }
         // Needs to return a Proxy to be sure useEffects are triggered
@@ -48,12 +49,20 @@ class WalletController {
         return provider ? new Proxy(provider, {}) : null;
     }
 
-    static async getSigner(): Promise<UnisatSigner | null> {
+    static async getSigner(): Promise<UnisatSigner | XverseSigner | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
         }
         return await wallet.controller.getSigner();
+    }
+
+    static async getBalance(): Promise<WalletBalance|null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        return await wallet.controller.getBalance();
     }
 
     //TODO: check if we really want to return a default network here
@@ -135,8 +144,8 @@ class WalletController {
     static async disconnectIfWalletChanged(newWallet: WalletConnectWallet) {
         const wallet = this.currentWallet;
         if (wallet && wallet.name != newWallet.name) {
-            await this.disconnect();
             this.unbindHooks();
+            await this.disconnect();
         }
     }
 
@@ -175,7 +184,7 @@ class WalletController {
         }
     }
 
-    static setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
+    static setChainChangedHook(fn: (network: WalletConnectNetwork|null) => void): void {
         const wallet = this.currentWallet;
         if (!wallet) {
             console.log('No current wallet to set network switch hook for');
@@ -185,9 +194,7 @@ class WalletController {
             wallet.controller.removeChainChangedHook();
             wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
                 const network = this.convertChainTypeToNetwork(chainType);
-                if (network) {
-                    fn(network);
-                }
+                fn(network);
             });
         } catch (error) {
             console.error('Error setting network switch hook:', error);

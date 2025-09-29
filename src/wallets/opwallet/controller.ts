@@ -3,6 +3,7 @@ import { type Unisat, type UnisatChainInfo, UnisatChainType } from '@btc-vision/
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type OPWalletInterface } from './interface';
+import type { WalletBalance } from '../../types';
 
 interface OPWalletWindow extends Window {
     opnet?: OPWalletInterface;
@@ -88,6 +89,13 @@ class OPWallet implements WalletBase {
             throw new Error(notInstalledError);
         }
         return this.walletBase.getPublicKey();
+    }
+
+    getBalance(): Promise<WalletBalance> {
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+        return this.walletBase.getBalance();
     }
 
     async getNetwork(): Promise<UnisatChainType> {

@@ -8,6 +8,7 @@ import {
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type UnisatWalletInterface } from './interface';
+import type { WalletBalance } from '../../types';
 
 interface UnisatWalletWindow extends Window {
     unisat?: UnisatWalletInterface;
@@ -85,7 +86,7 @@ class UnisatWallet implements WalletBase {
         }
         return this._isConnected
             ? await this.walletBase.disconnect().then(() => {
-                  this._isConnected = false;
+                this._isConnected = false;
               })
             : undefined;
     }
@@ -95,6 +96,13 @@ class UnisatWallet implements WalletBase {
             throw new Error(notInstalledError);
         }
         return this.walletBase.getPublicKey();
+    }
+
+    getBalance(): Promise<WalletBalance> {
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+        return this.walletBase.getBalance();
     }
 
     async getNetwork(): Promise<UnisatChainType> {
