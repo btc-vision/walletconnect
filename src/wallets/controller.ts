@@ -1,7 +1,6 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
 import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { DefaultWalletConnectNetwork } from '../consts';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
 import { type SupportedWallets } from './index';
@@ -59,7 +58,7 @@ class WalletController {
 
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
-    static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork {
+    static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork | null {
         const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
@@ -76,14 +75,14 @@ class WalletController {
             case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
             case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
             default:
-                return DefaultWalletConnectNetwork;
+                return null;
         }
     }
 
-    static async getNetwork(): Promise<WalletConnectNetwork> {
+    static async getNetwork(): Promise<WalletConnectNetwork | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
-            return DefaultWalletConnectNetwork;
+            return null;
         }
 
         const chainType = await wallet.controller.getNetwork();
@@ -185,7 +184,10 @@ class WalletController {
         try {
             wallet.controller.removeChainChangedHook();
             wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
-                fn(this.convertChainTypeToNetwork(chainType));
+                const network = this.convertChainTypeToNetwork(chainType);
+                if (network) {
+                    fn(network);
+                }
             });
         } catch (error) {
             console.error('Error setting network switch hook:', error);

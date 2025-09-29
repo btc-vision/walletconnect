@@ -23,6 +23,9 @@ class UnisatWallet implements WalletBase {
     private _isConnected: boolean = false;
 
     isInstalled() {
+        if (typeof window === 'undefined') {
+            return false;
+        }
         this.walletBase = (window as unknown as UnisatWalletWindow).unisat;
         return !!this.walletBase;
     }

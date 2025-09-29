@@ -1,6 +1,6 @@
 import { createContext, type ReactNode } from 'react';
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
-import { type WalletConnectNetwork, type WalletInformation } from '../types';
+import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from '../wallets';
 
@@ -9,7 +9,7 @@ export type WalletConnectContextType = {
     walletType: string | null;
     walletAddress: string | null;
     walletInstance: Unisat | null;
-    network: WalletConnectNetwork;
+    network: WalletConnectNetwork | null;
     publicKey: string | null;
     address: Address | null;
     openConnectModal: (children?: ReactNode) => void;
@@ -18,6 +18,7 @@ export type WalletConnectContextType = {
     disconnect: () => void;
     provider: AbstractRpcProvider | null;
     signer: UnisatSigner | null;
+    walletBalance: WalletBalance | null;
 };
 
 export const WalletConnectContext = createContext<WalletConnectContextType | undefined>(undefined);

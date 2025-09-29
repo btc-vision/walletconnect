@@ -1,9 +1,8 @@
 import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DefaultWalletConnectNetwork } from '../consts';
 import { WalletConnectContext } from '../context/WalletConnectContext';
-import type { WalletConnectNetwork, WalletInformation } from '../types.ts';
+import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
 import '../utils/style.css';
 import '../utils/theme.css';
 import { type SupportedWallets, WalletController } from '../wallets';
@@ -32,7 +31,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [network, setNetwork] = useState<WalletConnectNetwork>(DefaultWalletConnectNetwork);
+    const [network, setNetwork] = useState<WalletConnectNetwork | null>(null);
 
     const [supportedWallets] = useState<WalletConnectWallet[]>(WalletController.getWallets(supportedWalletsName));
     const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
@@ -48,6 +47,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -66,6 +66,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         } else {
             window.addEventListener('load', onPageLoad, false);
             return () => window.removeEventListener('load', onPageLoad);
+        }
+    }, []);
+
+    useEffect(() => {
+        const savedWallet = localStorage.getItem('WC_SelectedWallet') as SupportedWallets;
+        if (savedWallet) {
+            setSelectedWallet(savedWallet);
         }
     }, []);
 
@@ -100,7 +107,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         WalletController.removeChainChangedHook();
         WalletController.removeAccountsChangedHook();
         await WalletController.disconnect();
-        setNetwork(DefaultWalletConnectNetwork); // Triggers allWallets update after disconnecting
+        setNetwork(null);
     }, []);
 
     const connectToWallet = useCallback(
@@ -122,7 +129,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
                     const publicKey = await WalletController.getPublicKey();
                     const network = await WalletController.getNetwork();
-                    const provider = WalletController.getProvider(network.chainType);
+                    const provider = network ? WalletController.getProvider(network.chainType) : null;
 
                     setWalletAddress(response.data[0]);
                     setPublicKey(publicKey);
@@ -134,6 +141,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                     WalletController.setDisconnectHook(disconnect);
 
                     closeConnectModal();
+                    console.log('Connected to wallet:', wallet);
                     setSelectedWallet(wallet);
                     localStorage.setItem('WC_SelectedWallet', wallet);
                 } else if (response.data && 'message' in response.data) {
@@ -238,6 +246,23 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         void updateSigner();
     }, [network, publicKey]);
 
+    useEffect(() => {
+        const fetchBalance = async () => {
+            if (walletAddress && walletInstance) {
+                try {
+                    const balance = (await walletInstance.getBalance()) as WalletBalance | null;
+                    setWalletBalance(balance);
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
+                    setWalletBalance(null);
+                }
+            } else {
+                setWalletBalance(null);
+            }
+        };
+        void fetchBalance();
+    }, [walletAddress, walletInstance]);
+
     const currentTheme = useMemo(() => {
         const currentTheme = theme || 'light';
         return `wallet-connect-${currentTheme}-theme`;
@@ -262,6 +287,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                 walletInstance,
                 provider,
                 signer,
+                walletBalance,
                 walletType,
             }}>
             {children}
