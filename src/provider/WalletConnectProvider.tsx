@@ -34,9 +34,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const [network, setNetwork] = useState<WalletConnectNetwork | null>(null);
 
     const [supportedWallets] = useState<WalletConnectWallet[]>(WalletController.getWallets(supportedWalletsName));
-    const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
-        () => (localStorage.getItem('WC_SelectedWallet') as SupportedWallets) || null,
-    );
+    const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(null)
     const [connecting, setConnecting] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalContent, setModalContent] = useState<ReactNode | null>(null);
@@ -91,6 +89,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const closeConnectModal = () => {
         setModalOpen(false);
         setConnectError(undefined);
+        setModalContent(null);
     };
 
     const disconnect = useCallback(async () => {
@@ -195,26 +194,23 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
     const accountsChanged = useCallback(
         async (accounts: string[]) => {
-            console.log('Accounts', accounts);
-            if (selectedWallet) {
-                const account = accounts.length > 0 ? accounts[0] : null;
-                const publicKey = account ? await WalletController.getPublicKey() : null;
-                setWalletAddress(account);
-                setPublicKey(publicKey);
-            }
+            console.log('Account changed, updating address');
+            const account = accounts.length > 0 ? accounts[0] : null;
+            const publicKey = account ? await WalletController.getPublicKey() : null;
+            setWalletAddress(account);
+            setPublicKey(publicKey);
         },
-        [selectedWallet, setWalletAddress, setPublicKey],
+        [setWalletAddress, setPublicKey],
     );
 
     const chainChanged = useCallback(
         (network: WalletConnectNetwork): void => {
-            if (selectedWallet) {
-                const provider = WalletController.getProvider(network.chainType);
-                setNetwork(network);
-                setProvider(provider);
-            }
+            console.log('Network changed, updating network', network);
+            const provider = WalletController.getProvider(network.chainType);
+            setNetwork(network);
+            setProvider(provider);
         },
-        [selectedWallet, setNetwork],
+        [setNetwork],
     );
 
     const allWallets = useMemo(() => {
