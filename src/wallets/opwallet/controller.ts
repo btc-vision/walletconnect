@@ -35,10 +35,6 @@ class OPWallet implements WalletBase {
         return accounts.length > 0;
     }
 
-    getChainId(): void {
-        throw new Error('Method not implemented.');
-    }
-
     async connect(): Promise<string[]> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);

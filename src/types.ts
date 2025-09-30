@@ -1,5 +1,13 @@
 import { type Network } from '@btc-vision/bitcoin';
-import { UnisatChainType } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType } from '@btc-vision/transaction';
+import type { Xverse } from './wallets/xverse/interface';
+
+export function isXverse(walletInstance: Unisat|Xverse|null): walletInstance is Xverse {
+    return typeof walletInstance == 'object' && (walletInstance as Xverse)?.createInscription !== undefined;
+}
+export function isUnisat(walletInstance: Unisat|Xverse|null): walletInstance is Unisat {
+    return typeof walletInstance == 'object' && (walletInstance as Unisat)?.web3 !== undefined;
+}
 
 export interface WalletConnectNetwork extends Network {
     chainType: UnisatChainType;

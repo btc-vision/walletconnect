@@ -9,21 +9,22 @@ export interface WalletBase {
     isInstalled(): boolean;
     isConnected(): boolean;
     canAutoConnect(): Promise<boolean>;
-    getWalletInstance(): Unisat | Xverse | null;
-    getProvider(chainType: UnisatChainType): AbstractRpcProvider | null;
-    getSigner(): Promise<UnisatSigner | XverseSigner | null>;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
+
+    getWalletInstance(): Unisat | Xverse | null;
     getPublicKey(): Promise<string | null>;
-    getBalance(): Promise<WalletBalance>;
     getNetwork(): Promise<UnisatChainType>;
+    getSigner(): Promise<UnisatSigner | XverseSigner | null>;
+    getBalance(): Promise<WalletBalance>;
+    getProvider(chainType: UnisatChainType): AbstractRpcProvider | null;
+
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;
     setDisconnectHook(fn: () => void): void;
     removeDisconnectHook(): void;
     setChainChangedHook(fn: (network: UnisatChainType) => void): void;
     removeChainChangedHook(): void;
-    getChainId(): void;
 }
 
 export interface WalletConnectWallet {

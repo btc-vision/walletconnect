@@ -66,10 +66,6 @@ class UnisatWallet implements WalletBase {
         return signer;
     }
 
-    getChainId(): void {
-        throw new Error('Method not implemented.');
-    }
-
     async connect(): Promise<string[]> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);

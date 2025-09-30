@@ -1,5 +1,4 @@
 import type { Unisat } from '@btc-vision/transaction';
-import type { WalletBalance } from '../../types';
 
 export interface XverseAddress {
     address: string;
@@ -106,7 +105,6 @@ export interface Xverse {
     addListener(event: 'networkChange', callback: (args: XverseNetworkChangeEvent) => void): () => void;
     createInscription: (data: InscriptionData) => Promise<InscriptionResult>;
     createRepeatInscriptions: (data: RepeatInscriptionsData) => Promise<InscriptionResult[]>;
-    getBalance: () => Promise<WalletBalance>;
     request: (method: string, params?: object) => Promise<XverseResponse>;
     sendBtcTransaction: (transaction: BtcTransaction) => Promise<TransactionResult>;
     signMessage: (message: string) => Promise<SignedMessageResult>;

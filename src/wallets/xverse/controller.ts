@@ -23,6 +23,9 @@ class XverseWallet implements WalletBase {
     private _isConnected: boolean = false;
 
     isInstalled() {
+        if (typeof window === 'undefined') {
+            return false;
+        }
         this.walletBase = (window as unknown as XverseWalletWindow).XverseProviders?.BitcoinProvider || null;
         return !!this.walletBase;
     }
@@ -37,27 +40,12 @@ class XverseWallet implements WalletBase {
     }
 
     getWalletInstance(): Xverse | null {
-        const getBalance = () => this.getBalance()
-        return (this._isConnected && this.walletBase && new Proxy(this.walletBase, {
-            get(target, property, receiver) {
-                console.log(`proxy called: ${String(property)}`);
-                if (property === 'getBalance') {
-                    console.log(`getting Balance!!!!`);
-                    return getBalance;
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return Reflect.get(target, property, receiver);
-            },
-        })) || null;
+        return (this._isConnected && this.walletBase) || null;
     }
 
     getProvider(): AbstractRpcProvider | null {
         //return this._isConnected && this.walletBase && new XverseProvider(this.walletBase) || null;
         return null;
-    }
-
-    getChainId(): void {
-        throw new Error('Method not implemented.');
     }
 
     async connect(): Promise<string[]> {
