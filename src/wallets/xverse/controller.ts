@@ -6,8 +6,9 @@ import type {
     XverseWalletInterface,
 } from './interface';
 import { UnisatChainType, XverseSigner } from '@btc-vision/transaction';
-import type { AbstractRpcProvider } from 'opnet';
+import { type AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import type { WalletBalance } from '../../types';
+import { networks } from '@btc-vision/bitcoin';
 
 interface XverseWalletWindow extends Window {
     XverseProviders?: XverseWalletInterface;
@@ -43,11 +44,6 @@ class XverseWallet implements WalletBase {
         return (this._isConnected && this.walletBase) || null;
     }
 
-    getProvider(): AbstractRpcProvider | null {
-        //return this._isConnected && this.walletBase && new XverseProvider(this.walletBase) || null;
-        return null;
-    }
-
     async connect(): Promise<string[]> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -76,6 +72,22 @@ class XverseWallet implements WalletBase {
                 this._isConnected = false;
               })
             : undefined;
+    }
+
+    public getProvider(chainType: UnisatChainType): AbstractRpcProvider | null {
+        if (!this._isConnected || !this.walletBase) return null;
+
+        switch (chainType) {
+            case UnisatChainType.BITCOIN_MAINNET:
+                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+            case UnisatChainType.BITCOIN_TESTNET:
+                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+            case UnisatChainType.BITCOIN_REGTEST:
+                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+            // TODO: Add Fractal Mainnet & Testnet when available
+            default:
+                return null;
+        }
     }
 
     async getSigner(): Promise<XverseSigner> {
