@@ -1,5 +1,5 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type Unisat, UnisatChainType, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType, UnisatNetwork, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletBalance, type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
@@ -16,9 +16,9 @@ class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
-    static getWallets = (supportedWallets?:SupportedWallets[]) => {
+    static getWallets = (supportedWallets?: SupportedWallets[]) => {
         const wallets = [...WalletController.wallets.values()]
-        return !supportedWallets ? wallets : wallets.filter((w)=>{
+        return !supportedWallets ? wallets : wallets.filter((w) => {
             return supportedWallets.includes(w.name);
         })
     }
@@ -39,7 +39,7 @@ class WalletController {
         return walletInstance ? new Proxy(walletInstance, {}) : null;
     }
 
-    static getProvider(chainType: UnisatChainType|undefined): AbstractRpcProvider | null {
+    static getProvider(chainType: UnisatChainType | undefined): AbstractRpcProvider | null {
         const wallet = this.currentWallet;
         if (!wallet || !chainType) {
             return null;
@@ -57,7 +57,7 @@ class WalletController {
         return await wallet.controller.getSigner();
     }
 
-    static async getBalance(): Promise<WalletBalance|null> {
+    static async getBalance(): Promise<WalletBalance | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -68,16 +68,16 @@ class WalletController {
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
     static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork | null {
-        const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
+        const walletNetwork = (network: Network, name: UnisatNetwork): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
             case UnisatChainType.BITCOIN_REGTEST:
-                return walletNetwork(networks.regtest, 'regtest');
+                return walletNetwork(networks.regtest, UnisatNetwork.regtest);
             case UnisatChainType.BITCOIN_TESTNET:
-                return walletNetwork(networks.testnet, 'testnet');
+                return walletNetwork(networks.testnet, UnisatNetwork.testnet);
             case UnisatChainType.BITCOIN_MAINNET:
-                return walletNetwork(networks.bitcoin, 'mainnet');
+                return walletNetwork(networks.bitcoin, UnisatNetwork.mainnet);
 
             case UnisatChainType.BITCOIN_TESTNET4:
             case UnisatChainType.BITCOIN_SIGNET:
@@ -184,7 +184,7 @@ class WalletController {
         }
     }
 
-    static setChainChangedHook(fn: (network: WalletConnectNetwork|null) => void): void {
+    static setChainChangedHook(fn: (network: WalletConnectNetwork | null) => void): void {
         const wallet = this.currentWallet;
         if (!wallet) {
             console.log('No current wallet to set network switch hook for');

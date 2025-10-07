@@ -25,8 +25,8 @@ interface WalletConnectProviderProps {
 
 const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const { theme, children } = props;
-    const { supportedWallets:  supportedWalletsName } = props;
-    const { recommendedWallet:  recommendedWalletName } = props;
+    const { supportedWallets: supportedWalletsName } = props;
+    const { recommendedWallet: recommendedWalletName } = props;
 
     const [pageLoaded, setPageLoaded] = useState<boolean>(false);
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
@@ -81,7 +81,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
         }
     }, [connectError, clearConnectError]);
 
-    const openConnectModal = (children?:ReactNode) => {
+    const openConnectModal = (children?: ReactNode) => {
         setConnectError(undefined);
         setModalOpen(true);
         setModalContent(children);
@@ -207,7 +207,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     );
 
     const chainChanged = useCallback(
-        (network: WalletConnectNetwork|null): void => {
+        (network: WalletConnectNetwork | null): void => {
             console.log('Network changed, updating network', network);
             const provider = WalletController.getProvider(network?.chainType);
             setNetwork(network);
@@ -247,7 +247,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
 
     useEffect(() => {
         const fetchBalance = async () => {
-            if (walletAddress && walletInstance) {
+                if (walletAddress && walletInstance) {
                 try {
                     const balance = await WalletController.getBalance();
                     setWalletBalance(balance);
@@ -332,11 +332,10 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                                         key={wallet.name}
                                         onClick={() => connectToWallet(wallet.name)}
                                         disabled={connecting || !wallet.controller.isInstalled()}
-                                        className={`wallet-button ${
-                                            wallet.controller.isInstalled()
+                                        className={`wallet-button ${wallet.controller.isInstalled()
                                                 ? 'wallet-installed'
                                                 : 'wallet-not-installed'
-                                        }`}>
+                                            }`}>
                                         {wallet.icon ? (
                                             <div
                                                 className="wallet-icon"
@@ -393,7 +392,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
                                 <p>Please wait</p>
                             </div>
                         )}
-                        { modalContent
+                        {modalContent
                             ? <div className="wallet-connect-content">{modalContent}</div>
                             : <></>
                         }
