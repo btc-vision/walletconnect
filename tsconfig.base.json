@@ -21,7 +21,7 @@
         "allowJs": true,
         "incremental": true,
         "allowSyntheticDefaultImports": true,
-        "verbatimModuleSyntax": true,
+        "verbatimModuleSyntax": false,
         "esModuleInterop": true
     },
     "include": ["src/**/*.ts", "src/*", "src/**/*.js", "src/*.ts", "src/*.js", "src/*.cjs"]

@@ -1,5 +1,5 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type Unisat, UnisatChainType, UnisatNetwork, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType, UnisatNetwork, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletBalance, type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
@@ -10,7 +10,6 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from './types.ts';
-import type { Xverse } from './xverse/interface';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -29,7 +28,7 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getWalletInstance(): Unisat | Xverse | null {
+    static getWalletInstance(): Unisat | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -49,7 +48,7 @@ class WalletController {
         return provider ? new Proxy(provider, {}) : null;
     }
 
-    static async getSigner(): Promise<UnisatSigner | XverseSigner | null> {
+    static async getSigner(): Promise<UnisatSigner | null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;

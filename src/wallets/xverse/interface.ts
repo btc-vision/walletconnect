@@ -1,3 +1,4 @@
+/*
 import type { Unisat } from '@btc-vision/transaction';
 
 export interface XverseAddress {
@@ -208,3 +209,4 @@ export const logo = "data:image/png;base64," +
     "q1vN35+NebzEOK8D+N9gzxPM+B1B9BpPy3p/VcbM3Gr+u9ks8v8WkV0560szYxqfBBxr+lTnYvrM" +
     "6MMnpi9bgDeBZSKyKmhCQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBu" +
     "8D+INtzIjYakkQAAAABJRU5ErkJggg=="
+*/

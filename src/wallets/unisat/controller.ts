@@ -62,6 +62,7 @@ class UnisatWallet implements WalletBase {
 
     async getSigner(): Promise<UnisatSigner> {
         const signer = new UnisatSigner();
+        signer.getPublicKey()
         await signer.init();
         return signer;
     }

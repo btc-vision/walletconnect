@@ -1,4 +1,4 @@
-import { Address, type Unisat, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -12,7 +12,6 @@ import type {
     ControllerResponse,
     WalletConnectWallet,
 } from '../wallets/types.ts';
-import type { Xverse } from '../wallets/xverse/interface';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -43,9 +42,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = (props) => {
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
-    const [walletInstance, setWalletInstance] = useState<Unisat | Xverse | null>(null);
+    const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
-    const [signer, setSigner] = useState<UnisatSigner | XverseSigner | null>(null);
+    const [signer, setSigner] = useState<UnisatSigner | null>(null);
     const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const clearConnectError = useCallback(() => {

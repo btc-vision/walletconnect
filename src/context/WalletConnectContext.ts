@@ -1,15 +1,14 @@
 import { createContext, type ReactNode } from 'react';
-import { Address, type Unisat, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from '../wallets';
-import type { Xverse } from '../wallets/xverse/interface';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];
     walletType: string | null;
     walletAddress: string | null;
-    walletInstance: Unisat | Xverse | null;
+    walletInstance: Unisat | null;
     network: WalletConnectNetwork | null;
     publicKey: string | null;
     address: Address | null;
@@ -18,7 +17,7 @@ export type WalletConnectContextType = {
     connecting: boolean;
     disconnect: () => void;
     provider: AbstractRpcProvider | null;
-    signer: UnisatSigner | XverseSigner | null;
+    signer: UnisatSigner | null;
     walletBalance: WalletBalance | null;
 };
 

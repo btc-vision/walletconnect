@@ -1,3 +1,4 @@
+/*
 import type { WalletBase } from '../types.ts';
 import type {
     XverseAccountChangeEvent, XverseAddress,
@@ -253,3 +254,4 @@ class XverseWallet implements WalletBase {
 }
 
 export default XverseWallet;
+*/

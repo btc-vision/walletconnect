@@ -1,8 +1,7 @@
-import { type Unisat, UnisatChainType, UnisatSigner, XverseSigner } from '@btc-vision/transaction';
+import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
 import type { WalletBalance } from '../types';
-import type { Xverse } from './xverse/interface';
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
@@ -12,10 +11,10 @@ export interface WalletBase {
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
 
-    getWalletInstance(): Unisat | Xverse | null;
+    getWalletInstance(): Unisat | null;
     getPublicKey(): Promise<string | null>;
     getNetwork(): Promise<UnisatChainType>;
-    getSigner(): Promise<UnisatSigner | XverseSigner | null>;
+    getSigner(): Promise<UnisatSigner | null>;
     getBalance(): Promise<WalletBalance>;
     getProvider(chainType: UnisatChainType): AbstractRpcProvider | null;
 
