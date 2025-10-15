@@ -151,12 +151,8 @@ class WalletController {
         if (!wallet) {
             return;
         }
-        try {
-            wallet.controller.removeAccountsChangedHook();
-            wallet.controller.setAccountsChangedHook(fn);
-        } catch (error) {
-            console.error('Error setting accounts changed hook:', error);
-        }
+        wallet.controller.removeAccountsChangedHook();
+        wallet.controller.setAccountsChangedHook(fn);
     }
 
     static setDisconnectHook(fn: () => void): void {
@@ -164,12 +160,8 @@ class WalletController {
         if (!wallet) {
             return;
         }
-        try {
-            wallet.controller.removeDisconnectHook();
-            wallet.controller.setDisconnectHook(fn);
-        } catch (error) {
-            console.error('Error setting disconnect hook:', error);
-        }
+        wallet.controller.removeDisconnectHook();
+        wallet.controller.setDisconnectHook(fn);
     }
 
     static setChainChangedHook(fn: (network: WalletConnectNetwork) => void): void {
@@ -178,17 +170,13 @@ class WalletController {
             console.log('No current wallet to set network switch hook for');
             return;
         }
-        try {
-            wallet.controller.removeChainChangedHook();
-            wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
-                const network = this.convertChainTypeToNetwork(chainType);
-                if (network) {
-                    fn(network);
-                }
-            });
-        } catch (error) {
-            console.error('Error setting network switch hook:', error);
-        }
+        wallet.controller.removeChainChangedHook();
+        wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
+            const network = this.convertChainTypeToNetwork(chainType);
+            if (network) {
+                fn(network);
+            }
+        });
     }
 
     static removeAccountsChangedHook(): void {

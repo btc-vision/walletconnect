@@ -90,10 +90,14 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         setPublicKey(null);
         setWalletAddress(null);
         setConnecting(false);
-        WalletController.removeDisconnectHook();
-        WalletController.removeChainChangedHook();
-        WalletController.removeAccountsChangedHook();
-        await WalletController.disconnect();
+        try {
+            WalletController.removeDisconnectHook();
+            WalletController.removeChainChangedHook();
+            WalletController.removeAccountsChangedHook();
+            await WalletController.disconnect();
+        } catch (hookError) {
+            console.warn('Error disconnecting from wallet:', hookError);
+        }
         setNetwork(null);
     }, []);
 
@@ -115,9 +119,13 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                     const network = await WalletController.getNetwork();
                     setNetwork(network);
 
-                    WalletController.setAccountsChangedHook(accountsChanged);
-                    WalletController.setChainChangedHook(chainChanged);
-                    WalletController.setDisconnectHook(disconnect);
+                    try {
+                        WalletController.setAccountsChangedHook(accountsChanged);
+                        WalletController.setChainChangedHook(chainChanged);
+                        WalletController.setDisconnectHook(disconnect);
+                    } catch (hookError) {
+                        console.warn('Error setting up wallet hooks:', hookError);
+                    }
 
                     closeConnectModal();
                     console.log('Connected to wallet:', wallet);
