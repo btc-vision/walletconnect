@@ -69,7 +69,7 @@ class OPWallet implements WalletBase {
         const chain = await this.walletBase.getChain();
         switch (chain.enum) {
             case UnisatChainType.BITCOIN_MAINNET:
-                return new JSONRpcProvider('https://api.opnet.org', networks.bitcoin);
+                return new JSONRpcProvider('https://mainnet.opnet.org', networks.bitcoin);
             case UnisatChainType.BITCOIN_TESTNET:
                 return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
             case UnisatChainType.BITCOIN_REGTEST:
