@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.9.9",
+    "version": "1.9.10",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
@@ -67,11 +67,11 @@
         "react-dom": "^19"
     },
     "devDependencies": {
-        "@babel/preset-env": "^7.28.3",
-        "@babel/preset-react": "^7.27.1",
-        "@babel/preset-typescript": "^7.27.1",
+        "@babel/preset-env": "^7.28.5",
+        "@babel/preset-react": "^7.28.5",
+        "@babel/preset-typescript": "^7.28.5",
         "@types/react": "^19.2.2",
-        "eslint-plugin-react-hooks": "^7.0.0",
+        "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.24",
         "gulp": "^5.0.1",
         "gulp-cached": "^1.1.1",
@@ -82,19 +82,19 @@
         "react-dom": "^19.2.0",
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
-        "typescript-eslint": "^8.46.1",
+        "typescript-eslint": "^8.46.3",
         "webpack-cli": "^6.0.1"
     },
     "dependencies": {
-        "@btc-vision/bitcoin": "^6.4.10",
-        "@btc-vision/transaction": "^1.6.18",
-        "@eslint/js": "^9.38.0",
+        "@btc-vision/bitcoin": "^6.4.11",
+        "@btc-vision/transaction": "^1.6.19",
+        "@eslint/js": "9.38.0",
         "css-loader": "^7.1.2",
-        "eslint-plugin-react-hooks": "^7.0.0",
+        "eslint-plugin-react-hooks": "^7.0.1",
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.5.0",
         "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.6.41",
+        "opnet": "^1.6.42",
         "style-loader": "^4.0.0",
         "webpack": "^5.102.1"
     }
