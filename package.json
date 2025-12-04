@@ -70,7 +70,7 @@
         "@babel/preset-env": "^7.28.5",
         "@babel/preset-react": "^7.28.5",
         "@babel/preset-typescript": "^7.28.5",
-        "@types/react": "^19.2.2",
+        "@types/react": "^19.2.7",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.24",
         "gulp": "^5.0.1",
@@ -78,24 +78,24 @@
         "gulp-typescript": "^6.0.0-alpha.1",
         "https-browserify": "^1.0.0",
         "os-browserify": "^0.3.0",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.1",
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
-        "typescript-eslint": "^8.46.3",
+        "typescript-eslint": "^8.48.1",
         "webpack-cli": "^6.0.1"
     },
     "dependencies": {
         "@btc-vision/bitcoin": "^6.4.11",
-        "@btc-vision/transaction": "^1.6.19",
+        "@btc-vision/transaction": "^1.7.18",
         "@eslint/js": "^9.39.1",
         "css-loader": "^7.1.2",
         "eslint-plugin-react-hooks": "^7.0.1",
         "gulp-clean": "^0.4.0",
         "gulp-eslint-new": "^2.5.0",
         "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.6.42",
+        "opnet": "^1.7.15",
         "style-loader": "^4.0.0",
-        "webpack": "^5.102.1"
+        "webpack": "^5.103.0"
     }
 }
