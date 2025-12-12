@@ -1,5 +1,6 @@
 import { type Network } from '@btc-vision/bitcoin';
 import { UnisatChainType } from '@btc-vision/transaction';
+import type { SupportedWallets } from './wallets';
 
 export interface WalletConnectNetwork extends Network {
     chainType: UnisatChainType;
@@ -7,7 +8,7 @@ export interface WalletConnectNetwork extends Network {
 }
 
 export interface WalletInformation {
-    name: string;
+    name: SupportedWallets;
     icon: string;
     isInstalled: boolean;
     isConnected: boolean;
