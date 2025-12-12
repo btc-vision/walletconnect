@@ -1,5 +1,10 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import {
+    type MLDSASignature,
+    type Unisat,
+    UnisatChainType,
+    UnisatSigner,
+} from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
@@ -226,6 +231,37 @@ class WalletController {
         this.removeDisconnectHook();
         this.removeChainChangedHook();
         this.removeAccountsChangedHook();
+    }
+
+    static async getMLDSAPublicKey(): Promise<string | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) return null;
+
+        return wallet.controller.getMLDSAPublicKey();
+    }
+
+    static async getHashedMLDSAKey(): Promise<string | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) return null;
+
+        return wallet.controller.getHashedMLDSAKey();
+    }
+
+    static async signMLDSAMessage(message: string): Promise<MLDSASignature | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) return null;
+
+        return wallet.controller.signMLDSAMessage(message);
+    }
+
+    static async verifyMLDSASignature(
+        message: string,
+        signature: MLDSASignature,
+    ): Promise<boolean> {
+        const wallet = this.currentWallet;
+        if (!wallet) return false;
+
+        return wallet.controller.verifyMLDSASignature(message, signature);
     }
 }
 
