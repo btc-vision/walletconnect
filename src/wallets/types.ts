@@ -1,4 +1,9 @@
-import { type Unisat, UnisatChainType, UnisatSigner } from '@btc-vision/transaction';
+import {
+    type MLDSASignature,
+    type Unisat,
+    UnisatChainType,
+    UnisatSigner,
+} from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
 export { type AbstractRpcProvider } from 'opnet';
@@ -21,6 +26,10 @@ export interface WalletBase {
     setChainChangedHook(fn: (network: UnisatChainType) => void): void;
     removeChainChangedHook(): void;
     getChainId(): void;
+    getMLDSAPublicKey(): Promise<string | null>;
+    getHashedMLDSAKey(): Promise<string | null>;
+    signMLDSAMessage(message: string): Promise<MLDSASignature | null>;
+    verifyMLDSASignature(message: string, signature: MLDSASignature): Promise<boolean>;
 }
 
 export interface WalletConnectWallet {
