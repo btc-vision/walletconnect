@@ -1,11 +1,5 @@
 import { networks } from '@btc-vision/bitcoin';
-import {
-    MessageSigner,
-    type MLDSASignature,
-    type Unisat,
-    type UnisatChainInfo,
-    UnisatChainType,
-} from '@btc-vision/transaction';
+import { type Unisat, type UnisatChainInfo, UnisatChainType } from '@btc-vision/transaction';
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type OPWalletInterface } from './interface';
@@ -199,33 +193,6 @@ class OPWallet implements WalletBase {
             this.walletBase.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
         }
-    }
-
-    async getMLDSAPublicKey(): Promise<string | null> {
-        if (!this._isConnected || !this.walletBase?.web3) return null;
-
-        return this.walletBase.web3.getMLDSAPublicKey();
-    }
-
-    async getHashedMLDSAKey(): Promise<string | null> {
-        const mldsaPublicKey = await this.getMLDSAPublicKey();
-        if (!mldsaPublicKey) return null;
-
-        const publicKeyBuffer = Buffer.from(mldsaPublicKey, 'hex');
-        const hash = MessageSigner.sha256(publicKeyBuffer);
-        return hash.toString('hex');
-    }
-
-    async signMLDSAMessage(message: string): Promise<MLDSASignature | null> {
-        if (!this._isConnected || !this.walletBase?.web3) return null;
-
-        return this.walletBase.web3.signMLDSAMessage(message);
-    }
-
-    async verifyMLDSASignature(message: string, signature: MLDSASignature): Promise<boolean> {
-        if (!this._isConnected || !this.walletBase?.web3) return false;
-
-        return this.walletBase.web3.verifyMLDSASignature(message, signature);
     }
 }
 

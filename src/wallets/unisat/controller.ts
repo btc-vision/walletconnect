@@ -1,6 +1,5 @@
 import { networks } from '@btc-vision/bitcoin';
 import {
-    type MLDSASignature,
     type Unisat,
     type UnisatChainInfo,
     UnisatChainType,
@@ -201,20 +200,6 @@ class UnisatWallet implements WalletBase {
             this.walletBase.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
         }
-    }
-
-    // Unisat doesn't support MLDSA so these methods return null or false
-    getMLDSAPublicKey(): Promise<string | null> {
-        return Promise.resolve(null);
-    }
-    getHashedMLDSAKey(): Promise<string | null> {
-        return Promise.resolve(null);
-    }
-    signMLDSAMessage(_message: string): Promise<MLDSASignature | null> {
-        return Promise.resolve(null);
-    }
-    verifyMLDSASignature(_message: string, _signature: MLDSASignature): Promise<boolean> {
-        return Promise.resolve(false);
     }
 }
 
