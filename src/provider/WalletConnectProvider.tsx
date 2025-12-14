@@ -1,4 +1,4 @@
-import { Address, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -39,6 +39,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
     const [signer, setSigner] = useState<UnisatSigner | null>(null);
     const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
+
+    const [mldsaPublicKey, setMldsaPublicKey] = useState<string | null>(null);
+    const [hashedMLDSAKey, setHashedMLDSAKey] = useState<string | null>(null);
 
     const clearConnectError = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -260,6 +263,36 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         void fetchBalance();
     }, [walletAddress, walletInstance]);
 
+    useEffect(() => {
+        const fetchMLDSAKeys = async () => {
+            if (publicKey) {
+                const mldsaPubKey = await WalletController.getMLDSAPublicKey();
+                setMldsaPublicKey(mldsaPubKey);
+
+                const hashedKey = await WalletController.getHashedMLDSAKey();
+                setHashedMLDSAKey(hashedKey);
+            } else {
+                setMldsaPublicKey(null);
+                setHashedMLDSAKey(null);
+            }
+        };
+        void fetchMLDSAKeys();
+    }, [publicKey]);
+
+    const signMLDSAMessage = useCallback(
+        async (message: string): Promise<MLDSASignature | null> => {
+            return WalletController.signMLDSAMessage(message);
+        },
+        [],
+    );
+
+    const verifyMLDSASignature = useCallback(
+        async (message: string, signature: MLDSASignature): Promise<boolean> => {
+            return WalletController.verifyMLDSASignature(message, signature);
+        },
+        [],
+    );
+
     const currentTheme = useMemo(() => {
         const currentTheme = theme || 'light';
         return `wallet-connect-${currentTheme}-theme`;
@@ -286,6 +319,10 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 signer,
                 walletBalance,
                 walletType,
+                mldsaPublicKey,
+                hashedMLDSAKey,
+                signMLDSAMessage,
+                verifyMLDSASignature,
             }}>
             {children}
             {modalOpen && (
