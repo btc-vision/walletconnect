@@ -299,8 +299,12 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     }, [theme]);
 
     const address = useMemo(() => {
-        return mldsaPublicKey ? Address.fromString(mldsaPublicKey) : null;
-    }, [mldsaPublicKey]);
+        return mldsaPublicKey && publicKey
+            ? Address.fromString(mldsaPublicKey, publicKey)
+            : mldsaPublicKey
+            ? Address.fromString(mldsaPublicKey)
+            : null;
+    }, [mldsaPublicKey, publicKey]);
 
     return (
         <WalletConnectContext.Provider
