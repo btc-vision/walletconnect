@@ -1,9 +1,19 @@
 import { type Network } from '@btc-vision/bitcoin';
-import { UnisatChainType } from '@btc-vision/transaction';
 import type { SupportedWallets } from './wallets';
+export type { MessageType } from '@btc-vision/transaction';
+
+export enum WalletNetwork {
+    BITCOIN_MAINNET = 'BITCOIN_MAINNET',
+    BITCOIN_TESTNET4 = 'BITCOIN_TESTNET4',
+    BITCOIN_TESTNET = 'BITCOIN_TESTNET',
+    BITCOIN_REGTEST = 'BITCOIN_REGTEST',
+    BITCOIN_SIGNET = 'BITCOIN_SIGNET',
+    FRACTAL_BITCOIN_TESTNET = 'FRACTAL_BITCOIN_TESTNET',
+    FRACTAL_BITCOIN_MAINNET = 'FRACTAL_BITCOIN_MAINNET',
+}
 
 export interface WalletConnectNetwork extends Network {
-    chainType: UnisatChainType;
+    chainType: WalletNetwork;
     network: string;
 }
 

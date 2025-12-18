@@ -1,11 +1,12 @@
 import {
+    type MessageType,
     type MLDSASignature,
     type Unisat,
-    UnisatChainType,
     UnisatSigner,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
+import type { WalletNetwork } from '../types';
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
@@ -18,16 +19,18 @@ export interface WalletBase {
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
     getPublicKey(): Promise<string | null>;
-    getNetwork(): Promise<UnisatChainType>;
+    getNetwork(): Promise<WalletNetwork>;
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;
     setDisconnectHook(fn: () => void): void;
     removeDisconnectHook(): void;
-    setChainChangedHook(fn: (network: UnisatChainType) => void): void;
+    setChainChangedHook(fn: (network: WalletNetwork) => void): void;
     removeChainChangedHook(): void;
     getChainId(): void;
     getMLDSAPublicKey(): Promise<string | null>;
     getHashedMLDSAKey(): Promise<string | null>;
+    switchNetwork(network: string): Promise<void>;
+    signMessage(message: string, messageType?: MessageType): Promise<string | null>;
     signMLDSAMessage(message: string): Promise<MLDSASignature | null>;
     verifyMLDSASignature(message: string, signature: MLDSASignature): Promise<boolean>;
 }

@@ -1,20 +1,20 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
 import {
+    type MessageType,
     type MLDSASignature,
     type Unisat,
-    UnisatChainType,
     UnisatSigner,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type WalletConnectNetwork } from '../types';
+import { type WalletConnectNetwork, WalletNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
 import { type SupportedWallets } from './index';
-import type {
-    ControllerConnectAccounts,
-    ControllerErrorResponse,
-    ControllerResponse,
-    WalletConnectWallet,
-} from './types.ts';
+import {
+    type ControllerConnectAccounts,
+    type ControllerErrorResponse,
+    type ControllerResponse,
+    type WalletConnectWallet,
+} from './types';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -60,22 +60,22 @@ class WalletController {
 
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
-    static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork | null {
+    static convertChainTypeToNetwork(chainType: WalletNetwork): WalletConnectNetwork | null {
         const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
-            case UnisatChainType.BITCOIN_REGTEST:
+            case WalletNetwork.BITCOIN_REGTEST:
                 return walletNetwork(networks.regtest, 'regtest');
-            case UnisatChainType.BITCOIN_TESTNET:
+            case WalletNetwork.BITCOIN_TESTNET:
                 return walletNetwork(networks.testnet, 'testnet');
-            case UnisatChainType.BITCOIN_MAINNET:
+            case WalletNetwork.BITCOIN_MAINNET:
                 return walletNetwork(networks.bitcoin, 'mainnet');
 
-            case UnisatChainType.BITCOIN_TESTNET4:
-            case UnisatChainType.BITCOIN_SIGNET:
-            case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
-            case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
+            case WalletNetwork.BITCOIN_TESTNET4:
+            case WalletNetwork.BITCOIN_SIGNET:
+            case WalletNetwork.FRACTAL_BITCOIN_TESTNET:
+            case WalletNetwork.FRACTAL_BITCOIN_MAINNET:
             default:
                 return null;
         }
@@ -176,7 +176,7 @@ class WalletController {
             return;
         }
         wallet.controller.removeChainChangedHook();
-        wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
+        wallet.controller.setChainChangedHook((chainType: WalletNetwork) => {
             const network = this.convertChainTypeToNetwork(chainType);
             if (network) {
                 fn(network);
@@ -231,6 +231,20 @@ class WalletController {
         this.removeDisconnectHook();
         this.removeChainChangedHook();
         this.removeAccountsChangedHook();
+    }
+
+    static async switchNetwork(network: WalletNetwork): Promise<void> {
+        const wallet = this.currentWallet;
+        if (!wallet) return;
+
+        return wallet.controller.switchNetwork(network);
+    }
+
+    static async signMessage(message: string, messageType?: MessageType): Promise<string | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) return null;
+
+        return wallet.controller.signMessage(message, messageType);
     }
 
     static async getMLDSAPublicKey(): Promise<string | null> {

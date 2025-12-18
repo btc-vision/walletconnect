@@ -1,5 +1,6 @@
 import { networks } from '@btc-vision/bitcoin';
 import {
+    type MessageType,
     type MLDSASignature,
     type Unisat,
     type UnisatChainInfo,
@@ -9,6 +10,7 @@ import {
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type UnisatWalletInterface } from './interface';
+import { WalletNetwork } from '../../types';
 
 interface UnisatWalletWindow extends Window {
     unisat?: UnisatWalletInterface;
@@ -99,7 +101,7 @@ class UnisatWallet implements WalletBase {
         return this.walletBase.getPublicKey();
     }
 
-    async getNetwork(): Promise<UnisatChainType> {
+    async getNetwork(): Promise<WalletNetwork> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
@@ -109,7 +111,7 @@ class UnisatWallet implements WalletBase {
             throw new Error('Failed to retrieve chain information');
         }
 
-        return chainInfo.enum;
+        return this.unisatChainToWalletNetwork(chainInfo.enum);
     }
 
     setAccountsChangedHook(fn: (accounts: string[]) => void): void {
@@ -177,7 +179,7 @@ class UnisatWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (chainType: UnisatChainType) => void): void {
+    setChainChangedHook(fn: (chainType: WalletNetwork) => void): void {
         console.log('Setting chain changed hook for Unisat');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -185,7 +187,7 @@ class UnisatWallet implements WalletBase {
 
         this.chainChangedHookWrapper = (chainInfo: UnisatChainInfo) => {
             console.log('Unisat ChainChanged Hook', chainInfo);
-            fn(chainInfo.enum);
+            fn(this.unisatChainToWalletNetwork(chainInfo.enum));
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);
@@ -201,6 +203,45 @@ class UnisatWallet implements WalletBase {
             this.walletBase.removeListener('chainChanged', this.chainChangedHookWrapper);
             this.chainChangedHookWrapper = undefined;
         }
+    }
+
+    unisatChainToWalletNetwork = (chainType: UnisatChainType): WalletNetwork => {
+        switch (chainType) {
+            case UnisatChainType.BITCOIN_MAINNET: return WalletNetwork.BITCOIN_MAINNET;
+            case UnisatChainType.BITCOIN_TESTNET: return WalletNetwork.BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_REGTEST: return WalletNetwork.BITCOIN_REGTEST;
+            case UnisatChainType.BITCOIN_TESTNET4: return WalletNetwork.BITCOIN_TESTNET4;
+            case UnisatChainType.FRACTAL_BITCOIN_MAINNET: return WalletNetwork.FRACTAL_BITCOIN_MAINNET;
+            case UnisatChainType.FRACTAL_BITCOIN_TESTNET: return WalletNetwork.FRACTAL_BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_SIGNET: return WalletNetwork.BITCOIN_SIGNET;
+            default: return WalletNetwork.BITCOIN_REGTEST;
+        }
+    }
+
+    walletNetworkToUnisatChain = (network: WalletNetwork): UnisatChainType => {
+        switch (network) {
+            case 'BITCOIN_MAINNET': return UnisatChainType.BITCOIN_MAINNET;
+            case 'BITCOIN_TESTNET': return UnisatChainType.BITCOIN_TESTNET;
+            case 'BITCOIN_REGTEST': return UnisatChainType.BITCOIN_REGTEST;
+            case 'BITCOIN_TESTNET4': return UnisatChainType.BITCOIN_TESTNET4;
+            case 'FRACTAL_BITCOIN_MAINNET': return UnisatChainType.FRACTAL_BITCOIN_MAINNET;
+            case 'FRACTAL_BITCOIN_TESTNET': return UnisatChainType.FRACTAL_BITCOIN_TESTNET;
+            case 'BITCOIN_SIGNET': return UnisatChainType.BITCOIN_SIGNET;
+            default: return UnisatChainType.BITCOIN_REGTEST;
+        }
+    }
+
+    async switchNetwork(network: WalletNetwork): Promise<void> {
+        if (!this._isConnected || !this.walletBase) return;
+
+        const unisatChainType = this.walletNetworkToUnisatChain(network);
+        await this.walletBase.switchChain(unisatChainType);
+    }
+
+    async signMessage(message: string, messageType?: MessageType): Promise<string | null> {
+        if (!this._isConnected || !this.walletBase) return null;
+
+        return this.walletBase.signMessage(message, messageType);
     }
 
     // Unisat doesn't support MLDSA so these methods return null or false

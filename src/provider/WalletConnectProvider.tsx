@@ -1,17 +1,17 @@
-import { Address, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type MessageType, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
-import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
+import type { WalletBalance, WalletConnectNetwork, WalletInformation, WalletNetwork } from '../types.ts';
 import '../utils/style.css';
 import '../utils/theme.css';
 import { type SupportedWallets, WalletController } from '../wallets';
-import type {
-    ControllerConnectAccounts,
-    ControllerErrorResponse,
-    ControllerResponse,
-    WalletConnectWallet,
-} from '../wallets/types.ts';
+import {
+    type ControllerConnectAccounts,
+    type ControllerErrorResponse,
+    type ControllerResponse,
+    type WalletConnectWallet
+} from '../wallets/types';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -279,6 +279,20 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         void fetchMLDSAKeys();
     }, [publicKey]);
 
+    const switchNetwork = useCallback(
+        async (network: WalletNetwork): Promise<void> => {
+            return WalletController.switchNetwork(network);
+        },
+        [],
+    );
+
+    const signMessage = useCallback(
+        async (message: string, messageType?: MessageType): Promise<string | null> => {
+            return WalletController.signMessage(message, messageType);
+        },
+        [],
+    );
+
     const signMLDSAMessage = useCallback(
         async (message: string): Promise<MLDSASignature | null> => {
             return WalletController.signMLDSAMessage(message);
@@ -325,6 +339,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 walletType,
                 mldsaPublicKey,
                 hashedMLDSAKey,
+                switchNetwork,
+                signMessage,
                 signMLDSAMessage,
                 verifyMLDSASignature,
             }}>
