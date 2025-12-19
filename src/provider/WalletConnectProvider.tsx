@@ -2,7 +2,13 @@ import { Address, type MessageType, type MLDSASignature } from '@btc-vision/tran
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
-import type { WalletBalance, WalletConnectNetwork, WalletInformation, WalletNetwork } from '../types.ts';
+import {
+    type WalletBalance,
+    type WalletConnectNetwork,
+    type WalletInformation,
+    type WalletChainType,
+    WalletNetwork,
+} from '../types';
 import '../utils/style.css';
 import '../utils/theme.css';
 import { type SupportedWallets, WalletController } from '../wallets';
@@ -281,7 +287,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     }, [publicKey]);
 
     const switchNetwork = useCallback(
-        async (network: WalletNetwork): Promise<void> => {
+        async (network: WalletNetwork|WalletChainType): Promise<void> => {
             return WalletController.switchNetwork(network);
         },
         [],

@@ -1,7 +1,13 @@
 import { Address, type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { createContext } from 'react';
-import type { WalletBalance, WalletConnectNetwork, WalletInformation, WalletNetwork } from '../types.ts';
+import {
+    type WalletBalance,
+    type WalletConnectNetwork,
+    type WalletInformation,
+    type WalletChainType,
+    WalletNetwork,
+} from '../types';
 import { type SupportedWallets } from '../wallets';
 import type { OPWallet } from '../wallets/opwallet/interface';
 
@@ -22,7 +28,7 @@ export type WalletConnectContextType = {
     walletBalance: WalletBalance | null;
     mldsaPublicKey: string | null;
     hashedMLDSAKey: string | null;
-    switchNetwork: (network: WalletNetwork) => Promise<void>;
+    switchNetwork: (network: WalletNetwork|WalletChainType) => Promise<void>;
     signMessage: (message: string, messageType?: MessageType) => Promise<string | null>;
     signMLDSAMessage: (message: string) => Promise<MLDSASignature | null>;
     verifyMLDSASignature: (message: string, signature: MLDSASignature) => Promise<boolean>;

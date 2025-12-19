@@ -4,7 +4,7 @@ import {
     type MLDSASignature,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type WalletBalance, type WalletConnectNetwork, WalletNetwork } from '../types';
+import { type WalletBalance, type WalletConnectNetwork, WalletChainType, WalletNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
 import { type SupportedWallets } from './index';
 import {
@@ -59,22 +59,22 @@ class WalletController {
 
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
-    static convertChainTypeToNetwork(chainType: WalletNetwork): WalletConnectNetwork | null {
-        const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
+    static convertChainTypeToNetwork(chainType: WalletChainType): WalletConnectNetwork | null {
+        const walletNetwork = (network: Network, name: WalletNetwork): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
-            case WalletNetwork.BITCOIN_REGTEST:
-                return walletNetwork(networks.regtest, 'regtest');
-            case WalletNetwork.BITCOIN_TESTNET:
-                return walletNetwork(networks.testnet, 'testnet');
-            case WalletNetwork.BITCOIN_MAINNET:
-                return walletNetwork(networks.bitcoin, 'mainnet');
+            case WalletChainType.BITCOIN_REGTEST:
+                return walletNetwork(networks.regtest, WalletNetwork.regtest);
+            case WalletChainType.BITCOIN_TESTNET:
+                return walletNetwork(networks.testnet, WalletNetwork.testnet);
+            case WalletChainType.BITCOIN_MAINNET:
+                return walletNetwork(networks.bitcoin, WalletNetwork.mainnet);
 
-            case WalletNetwork.BITCOIN_TESTNET4:
-            case WalletNetwork.BITCOIN_SIGNET:
-            case WalletNetwork.FRACTAL_BITCOIN_TESTNET:
-            case WalletNetwork.FRACTAL_BITCOIN_MAINNET:
+            case WalletChainType.BITCOIN_TESTNET4:
+            case WalletChainType.BITCOIN_SIGNET:
+            case WalletChainType.FRACTAL_BITCOIN_TESTNET:
+            case WalletChainType.FRACTAL_BITCOIN_MAINNET:
             default:
                 return null;
         }
@@ -183,7 +183,7 @@ class WalletController {
             return;
         }
         wallet.controller.removeChainChangedHook();
-        wallet.controller.setChainChangedHook((chainType: WalletNetwork) => {
+        wallet.controller.setChainChangedHook((chainType: WalletChainType) => {
             const network = this.convertChainTypeToNetwork(chainType);
             if (network) {
                 fn(network);
@@ -240,7 +240,7 @@ class WalletController {
         this.removeAccountsChangedHook();
     }
 
-    static async switchNetwork(network: WalletNetwork): Promise<void> {
+    static async switchNetwork(network: WalletNetwork|WalletChainType): Promise<void> {
         const wallet = this.currentWallet;
         if (!wallet) return;
 

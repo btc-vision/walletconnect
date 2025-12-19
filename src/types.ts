@@ -8,6 +8,12 @@ export function isOPWallet(walletInstance: OPWallet|null): walletInstance is OPW
 }
 
 export enum WalletNetwork {
+    regtest = 'regtest',
+    testnet = 'testnet',
+    mainnet = 'mainnet',
+}
+
+export enum WalletChainType {
     BITCOIN_MAINNET = 'BITCOIN_MAINNET',
     BITCOIN_TESTNET4 = 'BITCOIN_TESTNET4',
     BITCOIN_TESTNET = 'BITCOIN_TESTNET',
@@ -18,8 +24,8 @@ export enum WalletNetwork {
 }
 
 export interface WalletConnectNetwork extends Network {
-    chainType: WalletNetwork;
-    network: string;
+    chainType: WalletChainType;
+    network: WalletNetwork;
 }
 
 export interface WalletInformation {

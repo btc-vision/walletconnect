@@ -4,7 +4,7 @@ import {
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
-import type { WalletBalance, WalletNetwork } from '../types';
+import { type WalletBalance, type WalletChainType, WalletNetwork } from '../types';
 import type { OPWallet } from './opwallet/interface';
 export { type AbstractRpcProvider } from 'opnet';
 
@@ -19,17 +19,17 @@ export interface WalletBase {
     disconnect(): Promise<void>;
     getPublicKey(): Promise<string | null>;
     getBalance(): Promise<WalletBalance | null>;
-    getNetwork(): Promise<WalletNetwork>;
+    getNetwork(): Promise<WalletChainType>;
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;
     setDisconnectHook(fn: () => void): void;
     removeDisconnectHook(): void;
-    setChainChangedHook(fn: (network: WalletNetwork) => void): void;
+    setChainChangedHook(fn: (network: WalletChainType) => void): void;
     removeChainChangedHook(): void;
     getChainId(): void;
     getMLDSAPublicKey(): Promise<string | null>;
     getHashedMLDSAKey(): Promise<string | null>;
-    switchNetwork(network: string): Promise<void>;
+    switchNetwork(network: WalletNetwork|WalletChainType): Promise<void>;
     signMessage(message: string, messageType?: MessageType): Promise<string | null>;
     signMLDSAMessage(message: string): Promise<MLDSASignature | null>;
     verifyMLDSASignature(message: string, signature: MLDSASignature): Promise<boolean>;

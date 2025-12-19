@@ -9,7 +9,7 @@ import {
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type OPWallet } from './interface';
-import { type WalletBalance, WalletNetwork } from '../../types';
+import { type WalletBalance, WalletChainType, WalletNetwork } from '../../types';
 
 interface OPWalletWindow extends Window {
     opnet?: OPWallet;
@@ -105,7 +105,7 @@ class OPWalletInstance implements WalletBase {
         return (await this.walletBase.getBalance()) as WalletBalance | null;
     }
 
-    async getNetwork(): Promise<WalletNetwork> {
+    async getNetwork(): Promise<WalletChainType> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
@@ -183,7 +183,7 @@ class OPWalletInstance implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (chainType: WalletNetwork) => void): void {
+    setChainChangedHook(fn: (chainType: WalletChainType) => void): void {
         console.log('Setting chain changed hook for OPWallet');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -224,33 +224,36 @@ class OPWalletInstance implements WalletBase {
         return hash.toString('hex');
     }
 
-    unisatChainToWalletNetwork = (chainType: UnisatChainType): WalletNetwork => {
+    unisatChainToWalletNetwork = (chainType: UnisatChainType): WalletChainType => {
         switch (chainType) {
-            case UnisatChainType.BITCOIN_MAINNET: return WalletNetwork.BITCOIN_MAINNET;
-            case UnisatChainType.BITCOIN_TESTNET: return WalletNetwork.BITCOIN_TESTNET;
-            case UnisatChainType.BITCOIN_REGTEST: return WalletNetwork.BITCOIN_REGTEST;
-            case UnisatChainType.BITCOIN_TESTNET4: return WalletNetwork.BITCOIN_TESTNET4;
-            case UnisatChainType.FRACTAL_BITCOIN_MAINNET: return WalletNetwork.FRACTAL_BITCOIN_MAINNET;
-            case UnisatChainType.FRACTAL_BITCOIN_TESTNET: return WalletNetwork.FRACTAL_BITCOIN_TESTNET;
-            case UnisatChainType.BITCOIN_SIGNET: return WalletNetwork.BITCOIN_SIGNET;
-            default: return WalletNetwork.BITCOIN_REGTEST;
+            case UnisatChainType.BITCOIN_MAINNET: return WalletChainType.BITCOIN_MAINNET;
+            case UnisatChainType.BITCOIN_TESTNET: return WalletChainType.BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_REGTEST: return WalletChainType.BITCOIN_REGTEST;
+            case UnisatChainType.BITCOIN_TESTNET4: return WalletChainType.BITCOIN_TESTNET4;
+            case UnisatChainType.FRACTAL_BITCOIN_MAINNET: return WalletChainType.FRACTAL_BITCOIN_MAINNET;
+            case UnisatChainType.FRACTAL_BITCOIN_TESTNET: return WalletChainType.FRACTAL_BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_SIGNET: return WalletChainType.BITCOIN_SIGNET;
+            default: return WalletChainType.BITCOIN_REGTEST;
         }
     }
 
-    walletNetworkToUnisatChain = (network: WalletNetwork): UnisatChainType => {
+    walletNetworkToUnisatChain = (network: WalletNetwork|WalletChainType): UnisatChainType => {
         switch (network) {
-            case 'BITCOIN_MAINNET': return UnisatChainType.BITCOIN_MAINNET;
-            case 'BITCOIN_TESTNET': return UnisatChainType.BITCOIN_TESTNET;
-            case 'BITCOIN_REGTEST': return UnisatChainType.BITCOIN_REGTEST;
-            case 'BITCOIN_TESTNET4': return UnisatChainType.BITCOIN_TESTNET4;
-            case 'FRACTAL_BITCOIN_MAINNET': return UnisatChainType.FRACTAL_BITCOIN_MAINNET;
-            case 'FRACTAL_BITCOIN_TESTNET': return UnisatChainType.FRACTAL_BITCOIN_TESTNET;
-            case 'BITCOIN_SIGNET': return UnisatChainType.BITCOIN_SIGNET;
+            case WalletNetwork.mainnet:
+            case WalletChainType.BITCOIN_MAINNET: return UnisatChainType.BITCOIN_MAINNET;
+            case WalletNetwork.testnet:
+            case WalletChainType.BITCOIN_TESTNET: return UnisatChainType.BITCOIN_TESTNET;
+            case WalletNetwork.regtest:
+            case WalletChainType.BITCOIN_REGTEST: return UnisatChainType.BITCOIN_REGTEST;
+            case WalletChainType.BITCOIN_TESTNET4: return UnisatChainType.BITCOIN_TESTNET4;
+            case WalletChainType.FRACTAL_BITCOIN_MAINNET: return UnisatChainType.FRACTAL_BITCOIN_MAINNET;
+            case WalletChainType.FRACTAL_BITCOIN_TESTNET: return UnisatChainType.FRACTAL_BITCOIN_TESTNET;
+            case WalletChainType.BITCOIN_SIGNET: return UnisatChainType.BITCOIN_SIGNET;
             default: return UnisatChainType.BITCOIN_REGTEST;
         }
     }
 
-    async switchNetwork(network: WalletNetwork): Promise<void> {
+    async switchNetwork(network: WalletNetwork|WalletChainType): Promise<void> {
         if (!this._isConnected || !this.walletBase) return;
 
         const unisatChainType = this.walletNetworkToUnisatChain(network)
