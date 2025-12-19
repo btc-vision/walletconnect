@@ -1,14 +1,15 @@
-import { Address, type MessageType, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { createContext } from 'react';
 import type { WalletBalance, WalletConnectNetwork, WalletInformation, WalletNetwork } from '../types.ts';
 import { type SupportedWallets } from '../wallets';
+import type { OPWallet } from '../wallets/opwallet/interface';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];
     walletType: string | null;
     walletAddress: string | null;
-    walletInstance: Unisat | null;
+    walletInstance: OPWallet | null;
     network: WalletConnectNetwork | null;
     publicKey: string | null;
     address: Address | null;
@@ -17,7 +18,7 @@ export type WalletConnectContextType = {
     connecting: boolean;
     disconnect: () => Promise<void>;
     provider: AbstractRpcProvider | null;
-    signer: UnisatSigner | null;
+    signer: null;
     walletBalance: WalletBalance | null;
     mldsaPublicKey: string | null;
     hashedMLDSAKey: string | null;

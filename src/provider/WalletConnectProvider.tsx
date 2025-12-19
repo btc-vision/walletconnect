@@ -1,4 +1,4 @@
-import { Address, type MessageType, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
@@ -12,6 +12,7 @@ import {
     type ControllerResponse,
     type WalletConnectWallet
 } from '../wallets/types';
+import type { OPWallet } from '../wallets/opwallet/interface';
 
 const AUTO_RECONNECT_RETRIES = 5;
 
@@ -35,9 +36,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
-    const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
+    const [walletInstance, setWalletInstance] = useState<OPWallet | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
-    const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [signer, setSigner] = useState<null>(null);
     const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const [mldsaPublicKey, setMldsaPublicKey] = useState<string | null>(null);
@@ -250,7 +251,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         const fetchBalance = async () => {
             if (walletAddress && walletInstance) {
                 try {
-                    const balance = (await walletInstance.getBalance()) as WalletBalance | null;
+                    const balance = await WalletController.getBalance();
                     setWalletBalance(balance);
                 } catch (error) {
                     console.error('Error fetching balance:', error);

@@ -2,11 +2,9 @@ import { type Network, networks } from '@btc-vision/bitcoin';
 import {
     type MessageType,
     type MLDSASignature,
-    type Unisat,
-    UnisatSigner,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type WalletConnectNetwork, WalletNetwork } from '../types';
+import { type WalletBalance, type WalletConnectNetwork, WalletNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
 import { type SupportedWallets } from './index';
 import {
@@ -15,6 +13,7 @@ import {
     type ControllerResponse,
     type WalletConnectWallet,
 } from './types';
+import type { OPWallet } from './opwallet/interface';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
@@ -30,7 +29,7 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getWalletInstance(): Unisat | null {
+    static getWalletInstance(): OPWallet | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -50,7 +49,7 @@ class WalletController {
         return provider ? new Proxy(provider, {}) : null;
     }
 
-    static async getSigner(): Promise<UnisatSigner | null> {
+    static async getSigner(): Promise<null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -97,6 +96,14 @@ class WalletController {
             return null;
         }
         return wallet.controller.getPublicKey();
+    }
+
+    static async getBalance(): Promise<WalletBalance | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        return wallet.controller.getBalance();
     }
 
     static async canAutoConnect(walletName: string) {

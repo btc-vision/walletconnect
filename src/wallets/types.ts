@@ -1,24 +1,24 @@
 import {
     type MessageType,
     type MLDSASignature,
-    type Unisat,
-    UnisatSigner,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type SupportedWallets } from './index';
-import type { WalletNetwork } from '../types';
+import type { WalletBalance, WalletNetwork } from '../types';
+import type { OPWallet } from './opwallet/interface';
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
     isInstalled(): boolean;
     isConnected(): boolean;
     canAutoConnect(): Promise<boolean>;
-    getWalletInstance(): Unisat | null;
+    getWalletInstance(): OPWallet | null;
     getProvider(): Promise<AbstractRpcProvider | null>;
-    getSigner(): Promise<UnisatSigner | null>;
+    getSigner(): Promise<null>;
     connect(): Promise<string[] | undefined>;
     disconnect(): Promise<void>;
     getPublicKey(): Promise<string | null>;
+    getBalance(): Promise<WalletBalance | null>;
     getNetwork(): Promise<WalletNetwork>;
     setAccountsChangedHook(fn: (accounts: string[]) => void): void;
     removeAccountsChangedHook(): void;

@@ -1,6 +1,6 @@
 import { type Unisat, type UnisatChainType } from '@btc-vision/transaction';
 
-export interface OPWalletInterface extends Unisat {
+export interface OPWallet extends Unisat {
     disconnect: () => Promise<void>;
     switchChain: (chain: UnisatChainType) => Promise<{enum: UnisatChainType, name: string, network: string}>;
 }

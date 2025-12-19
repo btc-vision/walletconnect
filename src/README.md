@@ -14,7 +14,7 @@ Once you have created the controller class, you will need to add its name to the
 import { WalletController } from './controller.ts';
 import myWallet from './mywallet/controller.ts';
 
-type SupportedWallets = 'OP_WALLET' | 'UNISAT' | 'My Wallet';
+type SupportedWallets = 'OP_WALLET' | 'My Wallet';
 
 WalletController.registerWallet({
     name: 'My Wallet',

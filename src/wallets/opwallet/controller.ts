@@ -3,22 +3,21 @@ import {
     MessageSigner,
     MessageType,
     type MLDSASignature,
-    type Unisat,
     type UnisatChainInfo,
     UnisatChainType,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
-import { type OPWalletInterface } from './interface';
-import { WalletNetwork } from '../../types';
+import { type OPWallet } from './interface';
+import { type WalletBalance, WalletNetwork } from '../../types';
 
 interface OPWalletWindow extends Window {
-    opnet?: OPWalletInterface;
+    opnet?: OPWallet;
 }
 
 const notInstalledError = 'OP_WALLET is not installed';
 
-class OPWallet implements WalletBase {
+class OPWalletInstance implements WalletBase {
     private walletBase: OPWalletWindow['opnet'];
     private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
@@ -67,7 +66,7 @@ class OPWallet implements WalletBase {
             : undefined;
     }
 
-    getWalletInstance(): Unisat | null {
+    getWalletInstance(): OPWallet | null {
         return (this._isConnected && this.walletBase) || null;
     }
 
@@ -92,11 +91,18 @@ class OPWallet implements WalletBase {
         return Promise.resolve(null);
     }
 
-    getPublicKey(): Promise<string> {
+    async getPublicKey(): Promise<string> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
         return this.walletBase.getPublicKey();
+    }
+
+    async getBalance(): Promise<WalletBalance | null> {
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+        return (await this.walletBase.getBalance()) as WalletBalance | null;
     }
 
     async getNetwork(): Promise<WalletNetwork> {
@@ -270,4 +276,4 @@ class OPWallet implements WalletBase {
     }
 }
 
-export default OPWallet;
+export default OPWalletInstance;

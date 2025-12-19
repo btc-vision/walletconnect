@@ -1,6 +1,11 @@
 import { type Network } from '@btc-vision/bitcoin';
 import type { SupportedWallets } from './wallets';
+import type { OPWallet } from './wallets/opwallet/interface';
 export type { MessageType } from '@btc-vision/transaction';
+
+export function isOPWallet(walletInstance: OPWallet|null): walletInstance is OPWallet {
+    return typeof walletInstance == 'object' && (walletInstance as OPWallet)?.web3 !== undefined;
+}
 
 export enum WalletNetwork {
     BITCOIN_MAINNET = 'BITCOIN_MAINNET',
