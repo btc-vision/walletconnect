@@ -1,14 +1,9 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import {
-    type MLDSASignature,
-    type Unisat,
-    UnisatChainType,
-    UnisatSigner,
-} from '@btc-vision/transaction';
+import { type MLDSASignature, type Unisat, UnisatChainType, UnisatSigner, } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
-import { type SupportedWallets } from './supported-wallets';
+import { SupportedWallets } from './supported-wallets';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,

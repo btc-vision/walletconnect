@@ -1,11 +1,7 @@
-import {
-    type MLDSASignature,
-    type Unisat,
-    UnisatChainType,
-    UnisatSigner,
-} from '@btc-vision/transaction';
+import { type MLDSASignature, type Unisat, UnisatChainType, UnisatSigner, } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type SupportedWallets } from './supported-wallets';
+import { SupportedWallets } from './supported-wallets';
+
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {
