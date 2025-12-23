@@ -45,6 +45,9 @@ export default defineConfig({
     },
     resolve: {
         alias: {
+            util: 'util/',
+            crypto: 'crypto-browserify',
+            zlib: 'browserify-zlib',
             stream: 'stream-browserify',
             buffer: 'buffer',
             // Use source versions for proper tree-shaking (not browser bundles)
@@ -71,10 +74,10 @@ export default defineConfig({
                 process: true,
             },
             // Include crypto polyfill
-            include: ['crypto', 'buffer', 'process', 'stream', 'zlib'],
+            include: ['crypto', 'buffer', 'process', 'stream', 'zlib', 'util'],
             overrides: {
                 crypto: 'crypto-browserify',
-                zlib: 'browserify-zlib',
+                zlib: 'pako',
             },
         }),
         dts({
