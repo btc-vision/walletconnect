@@ -101,7 +101,7 @@
     "dependencies": {
         "@btc-vision/bitcoin": "^6.5.4",
         "@btc-vision/transaction": "^1.7.31",
-        "opnet": "^1.7.34",
+        "opnet": "^1.7.35",
         "pako": "^2.1.0"
     }
 }
