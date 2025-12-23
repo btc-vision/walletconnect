@@ -8,7 +8,7 @@ import {
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
-import { type SupportedWallets } from './index';
+import { type SupportedWallets } from './supported-wallets';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,

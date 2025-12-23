@@ -10,6 +10,7 @@ import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
 import { type OPWalletInterface } from './interface';
 
+// @ts-expect-error This is correct.
 interface OPWalletWindow extends Window {
     opnet?: OPWalletInterface;
 }
