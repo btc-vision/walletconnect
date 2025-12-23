@@ -1,31 +1,43 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.9.12",
+    "version": "1.9.13",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
-        "node": ">=20.0.0"
+        "node": ">=24.0.0"
     },
     "exports": {
         ".": {
+            "browser": {
+                "types": "./browser/index.d.ts",
+                "import": "./browser/index.js",
+                "require": "./browser/index.js",
+                "default": "./browser/index.js"
+            },
+            "node": {
+                "types": "./build/index.d.ts",
+                "import": "./build/index.js",
+                "require": "./build/index.js",
+                "default": "./build/index.js"
+            },
+            "types": "./build/index.d.ts",
             "import": "./build/index.js",
             "require": "./build/index.js",
-            "types": "./build/index.d.ts"
+            "default": "./build/index.js"
         },
         "./browser": {
+            "types": "./browser/index.d.ts",
             "import": "./browser/index.js",
             "require": "./browser/index.js",
-            "types": "./browser/index.d.ts"
+            "default": "./browser/index.js"
         }
     },
     "browser": {
         "./build/index.d.ts": "./browser/index.d.ts",
         "./build/index.js": "./browser/index.js",
         "Buffer": "buffer",
-        "crypto": "./src/crypto/crypto-browser.js",
-        "stream": "stream-browserify",
-        "zlib": "browserify-zlib"
+        "stream": "stream-browserify"
     },
     "homepage": "https://opnet.org",
     "keywords": [
@@ -56,11 +68,12 @@
         "url": "git://github.com/btc-vision/walletconnect.git"
     },
     "scripts": {
-        "watch": "gulp watch",
-        "build": "gulp build",
-        "setup": "npm i && npm run build",
-        "lint": "eslint .",
-        "browserBuild": "webpack --mode production",
+        "build": "eslint src && tsc",
+        "build:browser": "vite build -c vite.config.browser.ts",
+        "build:all": "npm run build && npm run build:browser",
+        "watch": "tsc --watch",
+        "setup": "npm i && npm run build:all",
+        "lint": "eslint src",
         "check:circular": "madge --circular --extensions ts,tsx src/",
         "prebuild": "npm run check:circular"
     },
@@ -69,37 +82,25 @@
         "react-dom": "^19"
     },
     "devDependencies": {
-        "@babel/preset-env": "^7.28.5",
-        "@babel/preset-react": "^7.28.5",
-        "@babel/preset-typescript": "^7.28.5",
+        "@eslint/js": "^9.39.1",
         "@types/react": "^19.2.7",
-        "baseline-browser-mapping": "^2.9.7",
+        "browserify-zlib": "^0.2.0",
+        "crypto-browserify": "^3.12.1",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.24",
-        "gulp": "^5.0.1",
-        "gulp-cached": "^1.1.1",
-        "gulp-typescript": "^6.0.0-alpha.1",
-        "https-browserify": "^1.0.0",
         "madge": "^8.0.0",
-        "os-browserify": "^0.3.0",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
         "stream-browserify": "^3.0.0",
-        "stream-http": "^3.2.0",
+        "typescript": "^5.8.3",
         "typescript-eslint": "^8.49.0",
-        "webpack-cli": "^6.0.1"
+        "vite": "^6.3.5",
+        "vite-plugin-dts": "^4.5.4",
+        "vite-plugin-node-polyfills": "^0.23.0"
     },
     "dependencies": {
         "@btc-vision/bitcoin": "^6.5.4",
         "@btc-vision/transaction": "^1.7.31",
-        "@eslint/js": "^9.39.1",
-        "css-loader": "^7.1.2",
-        "eslint-plugin-react-hooks": "^7.0.1",
-        "gulp-clean": "^0.4.0",
-        "gulp-eslint-new": "^2.5.0",
-        "gulp-logger-new": "^1.0.1",
-        "opnet": "^1.7.34",
-        "style-loader": "^4.0.0",
-        "webpack": "^5.103.0"
+        "opnet": "^1.7.34"
     }
 }

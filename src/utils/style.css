@@ -45,10 +45,12 @@
     background-color: var(--background-color);
     cursor: pointer;
 }
+
 .wallet-connect-header > button.close:hover {
     border: 1px solid rgba(254, 121, 1, 0.3);
     background-color: rgba(254, 121, 1, 0.1);
 }
+
 .wallet-connect-header > button.close svg {
     display: flex;
 }
@@ -85,6 +87,7 @@
     border: 1px solid var(--border-color);
     background-color: var(--button-background-color);
 }
+
 .wallet-list > button:disabled {
     opacity: 0.3;
     cursor: not-allowed;
@@ -94,26 +97,32 @@
     border: 1px solid rgba(254, 121, 1, 0.3);
     background-color: rgba(254, 121, 1, 0.1);
 }
+
 .wallet-icon {
     display: flex;
 }
+
 .wallet-icon img {
     max-height: 32px;
     filter: var(--icon-filter);
 }
+
 .wallet-name {
     font-size: x-large;
     text-align: left;
 }
+
 .wallet-connected {
     padding: 10px;
     font-size: medium;
     color: green;
 }
+
 div.wallet-not-installed {
     padding: 10px;
     font-size: medium;
 }
+
 div.wallet-waiting-plugin {
     padding: 10px;
     font-size: medium;

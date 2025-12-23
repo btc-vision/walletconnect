@@ -2,7 +2,7 @@ import { Address, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vi
 import { AbstractRpcProvider } from 'opnet';
 import { createContext } from 'react';
 import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
-import { type SupportedWallets } from '../wallets';
+import { SupportedWallets } from '../wallets';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];

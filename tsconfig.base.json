@@ -17,12 +17,10 @@
         "strictBindCallApply": true,
         "strictPropertyInitialization": true,
         "alwaysStrict": true,
-        "moduleResolution": "node",
         "allowJs": true,
         "incremental": true,
         "allowSyntheticDefaultImports": true,
-        "verbatimModuleSyntax": true,
         "esModuleInterop": true
     },
-    "include": ["src/**/*.ts", "src/*", "src/**/*.js", "src/*.ts", "src/*.js", "src/*.cjs"]
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"]
 }

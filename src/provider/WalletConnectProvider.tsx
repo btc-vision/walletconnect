@@ -5,7 +5,7 @@ import { WalletConnectContext } from '../context/WalletConnectContext';
 import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
 import '../utils/style.css';
 import '../utils/theme.css';
-import { type SupportedWallets, WalletController } from '../wallets';
+import { SupportedWallets, WalletController } from '../wallets';
 import type {
     ControllerConnectAccounts,
     ControllerErrorResponse,
