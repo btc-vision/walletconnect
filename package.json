@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.9.13",
+    "version": "1.9.14",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
@@ -68,7 +68,7 @@
         "url": "git://github.com/btc-vision/walletconnect.git"
     },
     "scripts": {
-        "build": "eslint src && tsc",
+        "build": "eslint src && tsc && mkdir -p build/utils && cp src/utils/*.css build/utils/",
         "build:browser": "vite build -c vite.config.browser.ts",
         "build:all": "npm run build && npm run build:browser",
         "watch": "tsc --watch",
