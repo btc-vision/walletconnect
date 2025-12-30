@@ -20,7 +20,7 @@ module's `init` method. You will need to pass the controller class as an argumen
 import { WalletController } from './controller.ts';
 import myWallet from './mywallet/controller.ts';
 
-type SupportedWallets = 'OP_WALLET' | 'UNISAT' | 'My Wallet';
+type SupportedWallets = 'OP_WALLET' | 'My Wallet';
 
 WalletController.registerWallet({
     name: 'My Wallet',

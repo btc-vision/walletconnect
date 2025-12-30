@@ -1,10 +1,31 @@
 import { type Network } from '@btc-vision/bitcoin';
-import { UnisatChainType } from '@btc-vision/transaction';
-import { SupportedWallets } from './wallets/supported-wallets';
+import { SupportedWallets } from './wallets';
+import type { OPWallet } from './wallets/opwallet/interface';
+export type { MessageType } from '@btc-vision/transaction';
+
+export function isOPWallet(walletInstance: OPWallet|null): walletInstance is OPWallet {
+    return typeof walletInstance == 'object' && (walletInstance as OPWallet)?.web3 !== undefined;
+}
+
+export enum WalletNetwork {
+    regtest = 'regtest',
+    testnet = 'testnet',
+    mainnet = 'mainnet',
+}
+
+export enum WalletChainType {
+    BITCOIN_MAINNET = 'BITCOIN_MAINNET',
+    BITCOIN_TESTNET4 = 'BITCOIN_TESTNET4',
+    BITCOIN_TESTNET = 'BITCOIN_TESTNET',
+    BITCOIN_REGTEST = 'BITCOIN_REGTEST',
+    BITCOIN_SIGNET = 'BITCOIN_SIGNET',
+    FRACTAL_BITCOIN_TESTNET = 'FRACTAL_BITCOIN_TESTNET',
+    FRACTAL_BITCOIN_MAINNET = 'FRACTAL_BITCOIN_MAINNET',
+}
 
 export interface WalletConnectNetwork extends Network {
-    chainType: UnisatChainType;
-    network: string;
+    chainType: WalletChainType;
+    network: WalletNetwork;
 }
 
 export interface WalletInformation {

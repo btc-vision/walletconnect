@@ -1,23 +1,23 @@
 import { networks } from '@btc-vision/bitcoin';
 import {
     MessageSigner,
+    MessageType,
     type MLDSASignature,
-    type Unisat,
     type UnisatChainInfo,
     UnisatChainType,
 } from '@btc-vision/transaction';
 import { AbstractRpcProvider, JSONRpcProvider } from 'opnet';
 import { type WalletBase } from '../types';
-import { type OPWalletInterface } from './interface';
+import { type OPWallet } from './interface';
+import { type WalletBalance, WalletChainType, WalletNetwork } from '../../types';
 
-// @ts-expect-error This is correct.
 interface OPWalletWindow extends Window {
-    opnet?: OPWalletInterface;
+    opnet?: OPWallet;
 }
 
 const notInstalledError = 'OP_WALLET is not installed';
 
-class OPWallet implements WalletBase {
+class OPWalletInstance implements WalletBase {
     private walletBase: OPWalletWindow['opnet'];
     private accountsChangedHookWrapper?: (accounts: Array<string>) => void;
     private chainChangedHookWrapper?: (network: UnisatChainInfo) => void;
@@ -66,7 +66,7 @@ class OPWallet implements WalletBase {
             : undefined;
     }
 
-    getWalletInstance(): Unisat | null {
+    getWalletInstance(): OPWallet | null {
         return (this._isConnected && this.walletBase) || null;
     }
 
@@ -91,14 +91,21 @@ class OPWallet implements WalletBase {
         return Promise.resolve(null);
     }
 
-    getPublicKey(): Promise<string> {
+    async getPublicKey(): Promise<string> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
         return this.walletBase.getPublicKey();
     }
 
-    async getNetwork(): Promise<UnisatChainType> {
+    async getBalance(): Promise<WalletBalance | null> {
+        if (!this.isInstalled() || !this.walletBase) {
+            throw new Error(notInstalledError);
+        }
+        return (await this.walletBase.getBalance()) as WalletBalance | null;
+    }
+
+    async getNetwork(): Promise<WalletChainType> {
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
         }
@@ -108,7 +115,7 @@ class OPWallet implements WalletBase {
             throw new Error('Failed to retrieve chain information');
         }
 
-        return chainInfo.enum;
+        return this.unisatChainToWalletNetwork(chainInfo.enum);
     }
 
     setAccountsChangedHook(fn: (accounts: string[]) => void): void {
@@ -176,7 +183,7 @@ class OPWallet implements WalletBase {
         }
     }
 
-    setChainChangedHook(fn: (chainType: UnisatChainType) => void): void {
+    setChainChangedHook(fn: (chainType: WalletChainType) => void): void {
         console.log('Setting chain changed hook for OPWallet');
         if (!this.isInstalled() || !this.walletBase) {
             throw new Error(notInstalledError);
@@ -184,7 +191,7 @@ class OPWallet implements WalletBase {
 
         this.chainChangedHookWrapper = (chainInfo: UnisatChainInfo) => {
             console.log('OPWallet ChainChanged Hook', chainInfo);
-            fn(chainInfo.enum);
+            fn(this.unisatChainToWalletNetwork(chainInfo.enum));
         };
 
         this.walletBase.on('chainChanged', this.chainChangedHookWrapper);
@@ -217,6 +224,48 @@ class OPWallet implements WalletBase {
         return hash.toString('hex');
     }
 
+    unisatChainToWalletNetwork = (chainType: UnisatChainType): WalletChainType => {
+        switch (chainType) {
+            case UnisatChainType.BITCOIN_MAINNET: return WalletChainType.BITCOIN_MAINNET;
+            case UnisatChainType.BITCOIN_TESTNET: return WalletChainType.BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_REGTEST: return WalletChainType.BITCOIN_REGTEST;
+            case UnisatChainType.BITCOIN_TESTNET4: return WalletChainType.BITCOIN_TESTNET4;
+            case UnisatChainType.FRACTAL_BITCOIN_MAINNET: return WalletChainType.FRACTAL_BITCOIN_MAINNET;
+            case UnisatChainType.FRACTAL_BITCOIN_TESTNET: return WalletChainType.FRACTAL_BITCOIN_TESTNET;
+            case UnisatChainType.BITCOIN_SIGNET: return WalletChainType.BITCOIN_SIGNET;
+            default: return WalletChainType.BITCOIN_REGTEST;
+        }
+    }
+
+    walletNetworkToUnisatChain = (network: WalletNetwork|WalletChainType): UnisatChainType => {
+        switch (network) {
+            case WalletNetwork.mainnet:
+            case WalletChainType.BITCOIN_MAINNET: return UnisatChainType.BITCOIN_MAINNET;
+            case WalletNetwork.testnet:
+            case WalletChainType.BITCOIN_TESTNET: return UnisatChainType.BITCOIN_TESTNET;
+            case WalletNetwork.regtest:
+            case WalletChainType.BITCOIN_REGTEST: return UnisatChainType.BITCOIN_REGTEST;
+            case WalletChainType.BITCOIN_TESTNET4: return UnisatChainType.BITCOIN_TESTNET4;
+            case WalletChainType.FRACTAL_BITCOIN_MAINNET: return UnisatChainType.FRACTAL_BITCOIN_MAINNET;
+            case WalletChainType.FRACTAL_BITCOIN_TESTNET: return UnisatChainType.FRACTAL_BITCOIN_TESTNET;
+            case WalletChainType.BITCOIN_SIGNET: return UnisatChainType.BITCOIN_SIGNET;
+            default: return UnisatChainType.BITCOIN_REGTEST;
+        }
+    }
+
+    async switchNetwork(network: WalletNetwork|WalletChainType): Promise<void> {
+        if (!this._isConnected || !this.walletBase) return;
+
+        const unisatChainType = this.walletNetworkToUnisatChain(network)
+        await this.walletBase.switchChain(unisatChainType);
+    }
+
+    async signMessage(message: string, messageType?: MessageType): Promise<string | null> {
+        if (!this._isConnected || !this.walletBase) return null;
+
+        return this.walletBase.signMessage(message, messageType);
+    }
+
     async signMLDSAMessage(message: string): Promise<MLDSASignature | null> {
         if (!this._isConnected || !this.walletBase?.web3) return null;
 
@@ -230,4 +279,4 @@ class OPWallet implements WalletBase {
     }
 }
 
-export default OPWallet;
+export default OPWalletInstance;

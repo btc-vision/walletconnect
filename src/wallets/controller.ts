@@ -1,8 +1,9 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type MLDSASignature, type Unisat, UnisatChainType, UnisatSigner, } from '@btc-vision/transaction';
+import { type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
-import { type WalletConnectNetwork } from '../types';
+import { type WalletBalance, type WalletConnectNetwork, WalletChainType, WalletNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
+import type { OPWallet } from './opwallet/interface';
 import { SupportedWallets } from './supported-wallets';
 import type {
     ControllerConnectAccounts,
@@ -25,7 +26,7 @@ class WalletController {
         return WalletController.currentWallet?.name || null;
     }
 
-    static getWalletInstance(): Unisat | null {
+    static getWalletInstance(): OPWallet | null {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -45,7 +46,7 @@ class WalletController {
         return provider ? new Proxy(provider, {}) : null;
     }
 
-    static async getSigner(): Promise<UnisatSigner | null> {
+    static async getSigner(): Promise<null> {
         const wallet = this.currentWallet;
         if (!wallet) {
             return null;
@@ -55,22 +56,22 @@ class WalletController {
 
     //TODO: check if we really want to return a default network here
     //      instead of null.  Default is there: DefaultWalletConnectChain.network
-    static convertChainTypeToNetwork(chainType: UnisatChainType): WalletConnectNetwork | null {
-        const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
+    static convertChainTypeToNetwork(chainType: WalletChainType): WalletConnectNetwork | null {
+        const walletNetwork = (network: Network, name: WalletNetwork): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
         switch (chainType) {
-            case UnisatChainType.BITCOIN_REGTEST:
-                return walletNetwork(networks.regtest, 'regtest');
-            case UnisatChainType.BITCOIN_TESTNET:
-                return walletNetwork(networks.testnet, 'testnet');
-            case UnisatChainType.BITCOIN_MAINNET:
-                return walletNetwork(networks.bitcoin, 'mainnet');
+            case WalletChainType.BITCOIN_REGTEST:
+                return walletNetwork(networks.regtest, WalletNetwork.regtest);
+            case WalletChainType.BITCOIN_TESTNET:
+                return walletNetwork(networks.testnet, WalletNetwork.testnet);
+            case WalletChainType.BITCOIN_MAINNET:
+                return walletNetwork(networks.bitcoin, WalletNetwork.mainnet);
 
-            case UnisatChainType.BITCOIN_TESTNET4:
-            case UnisatChainType.BITCOIN_SIGNET:
-            case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
-            case UnisatChainType.FRACTAL_BITCOIN_MAINNET:
+            case WalletChainType.BITCOIN_TESTNET4:
+            case WalletChainType.BITCOIN_SIGNET:
+            case WalletChainType.FRACTAL_BITCOIN_TESTNET:
+            case WalletChainType.FRACTAL_BITCOIN_MAINNET:
             default:
                 return null;
         }
@@ -92,6 +93,14 @@ class WalletController {
             return null;
         }
         return wallet.controller.getPublicKey();
+    }
+
+    static async getBalance(): Promise<WalletBalance | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) {
+            return null;
+        }
+        return wallet.controller.getBalance();
     }
 
     static async canAutoConnect(walletName: string) {
@@ -171,7 +180,7 @@ class WalletController {
             return;
         }
         wallet.controller.removeChainChangedHook();
-        wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
+        wallet.controller.setChainChangedHook((chainType: WalletChainType) => {
             const network = this.convertChainTypeToNetwork(chainType);
             if (network) {
                 fn(network);
@@ -226,6 +235,20 @@ class WalletController {
         this.removeDisconnectHook();
         this.removeChainChangedHook();
         this.removeAccountsChangedHook();
+    }
+
+    static async switchNetwork(network: WalletNetwork|WalletChainType): Promise<void> {
+        const wallet = this.currentWallet;
+        if (!wallet) return;
+
+        return wallet.controller.switchNetwork(network);
+    }
+
+    static async signMessage(message: string, messageType?: MessageType): Promise<string | null> {
+        const wallet = this.currentWallet;
+        if (!wallet) return null;
+
+        return wallet.controller.signMessage(message, messageType);
     }
 
     static async getMLDSAPublicKey(): Promise<string | null> {

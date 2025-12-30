@@ -1,10 +1,17 @@
-import { Address, type MLDSASignature, type Unisat, UnisatSigner } from '@btc-vision/transaction';
+import { Address, type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletConnectContext } from '../context/WalletConnectContext';
-import type { WalletBalance, WalletConnectNetwork, WalletInformation } from '../types.ts';
+import {
+    type WalletBalance,
+    type WalletConnectNetwork,
+    type WalletInformation,
+    type WalletChainType,
+    WalletNetwork,
+} from '../types';
 import '../utils/style.css';
 import '../utils/theme.css';
+import type { OPWallet } from '../wallets/opwallet/interface';
 import { SupportedWallets, WalletController } from '../wallets';
 import type {
     ControllerConnectAccounts,
@@ -35,9 +42,9 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
     const [walletType, setWalletType] = useState<SupportedWallets | null>(null);
-    const [walletInstance, setWalletInstance] = useState<Unisat | null>(null);
+    const [walletInstance, setWalletInstance] = useState<OPWallet | null>(null);
     const [provider, setProvider] = useState<AbstractRpcProvider | null>(null);
-    const [signer, setSigner] = useState<UnisatSigner | null>(null);
+    const [signer, setSigner] = useState<null>(null);
     const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
 
     const [mldsaPublicKey, setMldsaPublicKey] = useState<string | null>(null);
@@ -250,7 +257,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         const fetchBalance = async () => {
             if (walletAddress && walletInstance) {
                 try {
-                    const balance = (await walletInstance.getBalance()) as WalletBalance | null;
+                    const balance = await WalletController.getBalance();
                     setWalletBalance(balance);
                 } catch (error) {
                     console.error('Error fetching balance:', error);
@@ -278,6 +285,20 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         };
         void fetchMLDSAKeys();
     }, [publicKey]);
+
+    const switchNetwork = useCallback(
+        async (network: WalletNetwork|WalletChainType): Promise<void> => {
+            return WalletController.switchNetwork(network);
+        },
+        [],
+    );
+
+    const signMessage = useCallback(
+        async (message: string, messageType?: MessageType): Promise<string | null> => {
+            return WalletController.signMessage(message, messageType);
+        },
+        [],
+    );
 
     const signMLDSAMessage = useCallback(
         async (message: string): Promise<MLDSASignature | null> => {
@@ -325,6 +346,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                 walletType,
                 mldsaPublicKey,
                 hashedMLDSAKey,
+                switchNetwork,
+                signMessage,
                 signMLDSAMessage,
                 verifyMLDSASignature,
             }}>

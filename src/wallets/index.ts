@@ -1,20 +1,14 @@
 import { WalletController } from './controller';
-import OPWallet from './opwallet/controller';
 import { logo as OPWalletLogo } from './opwallet/interface';
-import { SupportedWallets } from './supported-wallets';
-import UniSatWallet from './unisat/controller';
-import { logo as UnisatLogo } from './unisat/interface';
+import OPWalletInstance from './opwallet/controller';
 
-WalletController.registerWallet({
+import { SupportedWallets } from './supported-wallets';
+
+WalletController.registerWallet(
+    {
     name: SupportedWallets.OP_WALLET,
     icon: OPWalletLogo,
-    controller: new OPWallet(),
-});
-
-WalletController.registerWallet({
-    name: SupportedWallets.UNISAT,
-    icon: UnisatLogo,
-    controller: new UniSatWallet(),
+    controller: new OPWalletInstance(),
 });
 
 export { WalletController, SupportedWallets };
