@@ -11,14 +11,14 @@ import {
 } from '../types';
 import '../utils/style.css';
 import '../utils/theme.css';
-import { type SupportedWallets, WalletController } from '../wallets';
-import {
-    type ControllerConnectAccounts,
-    type ControllerErrorResponse,
-    type ControllerResponse,
-    type WalletConnectWallet
-} from '../wallets/types';
 import type { OPWallet } from '../wallets/opwallet/interface';
+import { SupportedWallets, WalletController } from '../wallets';
+import type {
+    ControllerConnectAccounts,
+    ControllerErrorResponse,
+    ControllerResponse,
+    WalletConnectWallet,
+} from '../wallets/types.ts';
 
 const AUTO_RECONNECT_RETRIES = 5;
 

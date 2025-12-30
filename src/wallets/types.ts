@@ -1,11 +1,9 @@
-import {
-    type MessageType,
-    type MLDSASignature,
-} from '@btc-vision/transaction';
-import { AbstractRpcProvider } from 'opnet';
-import { type SupportedWallets } from './index';
 import { type WalletBalance, type WalletChainType, WalletNetwork } from '../types';
 import type { OPWallet } from './opwallet/interface';
+import { type MLDSASignature, type MessageType } from '@btc-vision/transaction';
+import { AbstractRpcProvider } from 'opnet';
+import { SupportedWallets } from './supported-wallets';
+
 export { type AbstractRpcProvider } from 'opnet';
 
 export interface WalletBase {

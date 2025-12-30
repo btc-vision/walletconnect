@@ -1,19 +1,16 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import {
-    type MessageType,
-    type MLDSASignature,
-} from '@btc-vision/transaction';
+import { type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletBalance, type WalletConnectNetwork, WalletChainType, WalletNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
-import { type SupportedWallets } from './index';
-import {
-    type ControllerConnectAccounts,
-    type ControllerErrorResponse,
-    type ControllerResponse,
-    type WalletConnectWallet,
-} from './types';
 import type { OPWallet } from './opwallet/interface';
+import { SupportedWallets } from './supported-wallets';
+import type {
+    ControllerConnectAccounts,
+    ControllerErrorResponse,
+    ControllerResponse,
+    WalletConnectWallet,
+} from './types.ts';
 
 class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();

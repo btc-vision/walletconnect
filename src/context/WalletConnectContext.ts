@@ -1,15 +1,9 @@
 import { Address, type MessageType, type MLDSASignature } from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { createContext } from 'react';
-import {
-    type WalletBalance,
-    type WalletConnectNetwork,
-    type WalletInformation,
-    type WalletChainType,
-    WalletNetwork,
-} from '../types';
-import { type SupportedWallets } from '../wallets';
 import type { OPWallet } from '../wallets/opwallet/interface';
+import type { WalletBalance, WalletConnectNetwork, WalletInformation, WalletChainType, WalletNetwork } from '../types.ts';
+import { SupportedWallets } from '../wallets';
 
 export type WalletConnectContextType = {
     allWallets: WalletInformation[];

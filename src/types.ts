@@ -1,5 +1,5 @@
 import { type Network } from '@btc-vision/bitcoin';
-import type { SupportedWallets } from './wallets';
+import { SupportedWallets } from './wallets';
 import type { OPWallet } from './wallets/opwallet/interface';
 export type { MessageType } from '@btc-vision/transaction';
 
