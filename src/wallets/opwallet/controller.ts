@@ -1,6 +1,5 @@
-import { networks } from '@btc-vision/bitcoin';
+import { fromHex, networks, sha256, toHex } from '@btc-vision/bitcoin';
 import {
-    MessageSigner,
     type MLDSASignature,
     type Unisat,
     type UnisatChainInfo,
@@ -212,9 +211,9 @@ class OPWallet implements WalletBase {
         const mldsaPublicKey = await this.getMLDSAPublicKey();
         if (!mldsaPublicKey) return null;
 
-        const publicKeyBuffer = Buffer.from(mldsaPublicKey, 'hex');
-        const hash = MessageSigner.sha256(publicKeyBuffer);
-        return hash.toString('hex');
+        const publicKeyBytes = fromHex(mldsaPublicKey);
+        const hash = sha256(publicKeyBytes);
+        return toHex(hash);
     }
 
     async signMLDSAMessage(message: string): Promise<MLDSASignature | null> {
