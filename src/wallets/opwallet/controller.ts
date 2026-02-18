@@ -75,11 +75,20 @@ class OPWallet implements WalletBase {
         const chain = await this.walletBase.getChain();
         switch (chain.enum) {
             case UnisatChainType.BITCOIN_MAINNET:
-                return new JSONRpcProvider('https://mainnet.opnet.org', networks.bitcoin);
+                return new JSONRpcProvider({
+                    url: 'https://mainnet.opnet.org',
+                    network: networks.bitcoin,
+                });
             case UnisatChainType.BITCOIN_TESTNET:
-                return new JSONRpcProvider('https://testnet.opnet.org', networks.testnet);
+                return new JSONRpcProvider({
+                    url: 'https://testnet.opnet.org',
+                    network: networks.testnet,
+                });
             case UnisatChainType.BITCOIN_REGTEST:
-                return new JSONRpcProvider('https://regtest.opnet.org', networks.regtest);
+                return new JSONRpcProvider({
+                    url: 'https://regtest.opnet.org',
+                    network: networks.regtest,
+                });
             // TODO: Add Fractal Mainnet & Testnet when available
             default:
                 return null;
