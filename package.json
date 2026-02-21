@@ -100,7 +100,7 @@
         "@btc-vision/bitcoin": "^7.0.0-rc.4",
         "@btc-vision/ecpair": "^4.0.5",
         "@btc-vision/transaction": "^1.8.0-rc.4",
-        "eslint": "^9.39.2",
+        "eslint": "^10.0.1",
         "opnet": "^1.8.1-rc.7"
     }
 }
