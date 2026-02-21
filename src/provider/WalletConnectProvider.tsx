@@ -302,8 +302,8 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         return mldsaPublicKey && publicKey
             ? Address.fromString(mldsaPublicKey, publicKey)
             : mldsaPublicKey
-            ? Address.fromString(mldsaPublicKey)
-            : null;
+              ? Address.fromString(mldsaPublicKey)
+              : null;
     }, [mldsaPublicKey, publicKey]);
 
     return (

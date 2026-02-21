@@ -1,5 +1,10 @@
 import { type Network, networks } from '@btc-vision/bitcoin';
-import { type MLDSASignature, type Unisat, UnisatChainType, UnisatSigner, } from '@btc-vision/transaction';
+import {
+    type MLDSASignature,
+    type Unisat,
+    UnisatChainType,
+    UnisatSigner,
+} from '@btc-vision/transaction';
 import { AbstractRpcProvider } from 'opnet';
 import { type WalletConnectNetwork } from '../types';
 import { _e } from '../utils/accessibility/errorDecoder';
@@ -15,13 +20,15 @@ class WalletController {
     private static wallets: Map<string, WalletConnectWallet> = new Map();
     private static currentWallet: WalletConnectWallet | null = null;
 
-    static getWallets = () => {
+    public static getWallets = () => {
         return [...WalletController.wallets.values()];
     };
-    static isWalletInstalled(wallet: string): boolean {
+
+    public static isWalletInstalled(wallet: string): boolean {
         return this.wallets.get(wallet)?.controller?.isInstalled() || false;
     }
-    static getWalletType(): SupportedWallets | null {
+
+    public static getWalletType(): SupportedWallets | null {
         return WalletController.currentWallet?.name || null;
     }
 
@@ -30,6 +37,7 @@ class WalletController {
         if (!wallet) {
             return null;
         }
+
         // Needs to return a Proxy to be sure useEffects are triggered
         const walletInstance = wallet.controller.getWalletInstance();
         return walletInstance ? new Proxy(walletInstance, {}) : null;
@@ -40,6 +48,7 @@ class WalletController {
         if (!wallet) {
             return null;
         }
+
         // Needs to return a Proxy to be sure useEffects are triggered
         const provider = await wallet.controller.getProvider();
         return provider ? new Proxy(provider, {}) : null;
@@ -50,6 +59,7 @@ class WalletController {
         if (!wallet) {
             return null;
         }
+
         return await wallet.controller.getSigner();
     }
 
@@ -59,6 +69,7 @@ class WalletController {
         const walletNetwork = (network: Network, name: string): WalletConnectNetwork => {
             return { ...network, chainType: chainType, network: name };
         };
+
         switch (chainType) {
             case UnisatChainType.BITCOIN_REGTEST:
                 return walletNetwork(networks.regtest, 'regtest');
@@ -91,11 +102,13 @@ class WalletController {
         if (!wallet) {
             return null;
         }
+
         return wallet.controller.getPublicKey();
     }
 
     static async canAutoConnect(walletName: string) {
         const wallet = this.wallets.get(walletName);
+
         return (wallet && (await wallet.controller.canAutoConnect())) || false;
     }
 
@@ -111,6 +124,7 @@ class WalletController {
                 },
             };
         }
+
         try {
             const accounts = await wallet.controller.connect();
             await this.disconnectIfWalletChanged(wallet);
@@ -142,6 +156,7 @@ class WalletController {
         if (!wallet) {
             return;
         }
+
         await wallet.controller.disconnect();
         this.currentWallet = null;
     }
@@ -151,6 +166,7 @@ class WalletController {
         if (!wallet) {
             return;
         }
+
         wallet.controller.removeAccountsChangedHook();
         wallet.controller.setAccountsChangedHook(fn);
     }
@@ -160,6 +176,7 @@ class WalletController {
         if (!wallet) {
             return;
         }
+
         wallet.controller.removeDisconnectHook();
         wallet.controller.setDisconnectHook(fn);
     }
@@ -170,6 +187,7 @@ class WalletController {
             console.log('No current wallet to set network switch hook for');
             return;
         }
+
         wallet.controller.removeChainChangedHook();
         wallet.controller.setChainChangedHook((chainType: UnisatChainType) => {
             const network = this.convertChainTypeToNetwork(chainType);
@@ -185,6 +203,7 @@ class WalletController {
             console.log('No current wallet to remove accounts changed hook from');
             return;
         }
+
         try {
             wallet.controller.removeAccountsChangedHook();
         } catch (error) {
@@ -198,6 +217,7 @@ class WalletController {
             console.log('No current wallet to remove disconnect hook from');
             return;
         }
+
         try {
             wallet.controller.removeDisconnectHook();
         } catch (error) {
@@ -211,6 +231,7 @@ class WalletController {
             console.log('No current wallet to remove network change hook from');
             return;
         }
+
         try {
             wallet.controller.removeChainChangedHook();
         } catch (error) {

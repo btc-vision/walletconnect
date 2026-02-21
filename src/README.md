@@ -37,6 +37,7 @@ src/
 ### WalletController
 
 The `WalletController` is a singleton class that manages all wallet connections. It:
+
 - Maintains a registry of supported wallets
 - Tracks the currently connected wallet
 - Provides a unified API for wallet operations
@@ -382,24 +383,28 @@ Wallets must properly handle these events:
 ### accountsChanged
 
 Triggered when the user switches accounts in the wallet. Your implementation should:
+
 1. Update the connected account
 2. Trigger disconnect if no accounts remain
 
 ### chainChanged
 
 Triggered when the user switches networks. Your implementation should:
+
 1. Update the network state
 2. Reconfigure providers if needed
 
 ### disconnect
 
 Triggered when the wallet disconnects. Your implementation should:
+
 1. Clean up state
 2. Remove all event listeners
 
 ## MLDSA Support
 
-ML-DSA (Module-Lattice Digital Signature Algorithm) provides quantum-resistant signatures. If your wallet supports MLDSA:
+ML-DSA (Module-Lattice Digital Signature Algorithm) provides quantum-resistant signatures. If your wallet supports
+MLDSA:
 
 1. Implement `getMLDSAPublicKey()` to return the MLDSA public key
 2. Implement `getHashedMLDSAKey()` to return SHA256(mldsaPublicKey)
