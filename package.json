@@ -1,7 +1,7 @@
 {
     "name": "@btc-vision/walletconnect",
     "type": "module",
-    "version": "1.10.0-rc.1",
+    "version": "1.10.0",
     "author": "impredmet",
     "description": "The OP_NET Wallet Connect library helps your dApp connect to any compatible wallet.",
     "engines": {
@@ -9,36 +9,16 @@
     },
     "exports": {
         ".": {
-            "browser": {
-                "types": "./browser/index.d.ts",
-                "import": "./browser/index.js",
-                "require": "./browser/index.js",
-                "default": "./browser/index.js"
-            },
-            "node": {
-                "types": "./build/index.d.ts",
-                "import": "./build/index.js",
-                "require": "./build/index.js",
-                "default": "./build/index.js"
-            },
             "types": "./build/index.d.ts",
             "import": "./build/index.js",
-            "require": "./build/index.js",
             "default": "./build/index.js"
-        },
-        "./browser": {
-            "types": "./browser/index.d.ts",
-            "import": "./browser/index.js",
-            "require": "./browser/index.js",
-            "default": "./browser/index.js"
         }
     },
-    "browser": {
-        "./build/index.d.ts": "./browser/index.d.ts",
-        "./build/index.js": "./browser/index.js",
-        "Buffer": "buffer",
-        "stream": "stream-browserify"
-    },
+    "files": [
+        "build",
+        "LICENSE",
+        "README.md"
+    ],
     "homepage": "https://opnet.org",
     "keywords": [
         "opnet",
@@ -69,10 +49,8 @@
     },
     "scripts": {
         "build": "eslint src && tsc && mkdir -p build/utils && cp src/utils/*.css build/utils/",
-        "build:browser": "vite build -c vite.config.browser.ts",
-        "build:all": "npm run build && npm run build:browser",
         "watch": "tsc --watch",
-        "setup": "npm i && npm run build:all",
+        "setup": "npm i && npm run build",
         "lint": "eslint src",
         "check:circular": "madge --circular --extensions ts,tsx src/",
         "prebuild": "npm run check:circular"
@@ -84,23 +62,20 @@
     "devDependencies": {
         "@eslint/js": "^9.39.2",
         "@types/react": "^19.2.14",
+        "eslint": "^9.39.2",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.5.0",
         "madge": "^8.0.0",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
         "typescript": "^5.9.3",
-        "typescript-eslint": "^8.56.0",
-        "vite": "^7.3.1",
-        "vite-plugin-dts": "^4.5.4",
-        "vite-plugin-node-polyfills": "^0.25.0"
+        "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
         "@btc-vision/bip32": "^7.1.2",
         "@btc-vision/bitcoin": "^7.0.0-rc.4",
         "@btc-vision/ecpair": "^4.0.5",
         "@btc-vision/transaction": "^1.8.0-rc.4",
-        "eslint": "^9.39.2",
         "opnet": "^1.8.1-rc.7"
     }
 }
