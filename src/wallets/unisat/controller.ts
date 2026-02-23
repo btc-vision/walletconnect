@@ -54,10 +54,10 @@ class UnisatWallet implements WalletBase {
                     url: 'https://mainnet.opnet.org',
                     network: networks.bitcoin,
                 });
-            case UnisatChainType.BITCOIN_TESTNET:
+            case UnisatChainType.OPNET_TESTNET:
                 return new JSONRpcProvider({
                     url: 'https://testnet.opnet.org',
-                    network: networks.testnet,
+                    network: networks.opnetTestnet,
                 });
             case UnisatChainType.BITCOIN_REGTEST:
                 return new JSONRpcProvider({

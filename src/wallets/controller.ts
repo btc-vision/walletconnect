@@ -73,11 +73,12 @@ class WalletController {
         switch (chainType) {
             case UnisatChainType.BITCOIN_REGTEST:
                 return walletNetwork(networks.regtest, 'regtest');
-            case UnisatChainType.BITCOIN_TESTNET:
-                return walletNetwork(networks.testnet, 'testnet');
+            case UnisatChainType.OPNET_TESTNET:
+                return walletNetwork(networks.opnetTestnet, 'testnet');
             case UnisatChainType.BITCOIN_MAINNET:
                 return walletNetwork(networks.bitcoin, 'mainnet');
 
+            case UnisatChainType.BITCOIN_TESTNET:
             case UnisatChainType.BITCOIN_TESTNET4:
             case UnisatChainType.BITCOIN_SIGNET:
             case UnisatChainType.FRACTAL_BITCOIN_TESTNET:
