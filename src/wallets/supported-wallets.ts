@@ -5,4 +5,5 @@
 export enum SupportedWallets {
     OP_WALLET = 'OP_WALLET',
     UNISAT = 'UNISAT',
+    MYSCRIBE = 'MYSCRIBE',
 }
