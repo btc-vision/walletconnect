@@ -15,12 +15,30 @@ import type {
 
 const AUTO_RECONNECT_RETRIES = 5;
 
+/**
+ * Default wallets to hide from the connect modal.
+ * UniSat is disabled by default because it does not support MLDSA signatures
+ * or full OPNet transaction signing. Developers can override this by passing
+ * an empty array (or a custom list) to the `disabledWallets` prop.
+ */
+const DEFAULT_DISABLED_WALLETS: SupportedWallets[] = [SupportedWallets.UNISAT];
+
 interface WalletConnectProviderProps {
     theme?: 'light' | 'dark' | 'moto';
     children: ReactNode;
+    /**
+     * Wallets to hide from the connect modal.
+     * Defaults to `[SupportedWallets.UNISAT]` since UniSat lacks MLDSA support.
+     * Pass `[]` to show all registered wallets.
+     */
+    disabledWallets?: SupportedWallets[];
 }
 
-const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, children }) => {
+const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({
+    theme,
+    children,
+    disabledWallets = DEFAULT_DISABLED_WALLETS,
+}) => {
     const [pageLoaded, setPageLoaded] = useState<boolean>(false);
     const [connectError, setConnectError] = useState<string | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -203,10 +221,14 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
         [selectedWallet, setNetwork],
     );
 
+    const enabledWallets = useMemo(() => {
+        return supportedWallets.filter(
+            (wallet) => !disabledWallets.includes(wallet.name),
+        );
+    }, [supportedWallets, disabledWallets]);
+
     const allWallets = useMemo(() => {
-        //console.log("Refreshing all wallets");
-        return supportedWallets.map((wallet): WalletInformation => {
-            //console.log(" --> ", wallet.name, wallet.controller.isInstalled(), wallet.controller.isConnected());
+        return enabledWallets.map((wallet): WalletInformation => {
             return {
                 name: wallet.name,
                 icon: wallet.icon,
@@ -215,13 +237,12 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
             };
         });
         // eslint-disable-next-line
-    }, [supportedWallets, network, pageLoaded]);
+    }, [enabledWallets, network, pageLoaded]);
 
     const availableWallets = useMemo(() => {
-        return supportedWallets.filter((wallet) => wallet.controller.isInstalled());
-        //return supportedWallets
+        return enabledWallets.filter((wallet) => wallet.controller.isInstalled());
         // eslint-disable-next-line
-    }, [supportedWallets, network, pageLoaded]);
+    }, [enabledWallets, network, pageLoaded]);
 
     useEffect(() => {
         const walletType = walletAddress ? WalletController.getWalletType() : null;
@@ -409,7 +430,7 @@ const WalletConnectProvider: React.FC<WalletConnectProviderProps> = ({ theme, ch
                                 <p>No wallets available</p>
                                 <p>Supporting the following wallets</p>
                                 <div className="wallet-list">
-                                    {supportedWallets.map((wallet) => (
+                                    {enabledWallets.map((wallet) => (
                                         <a
                                             href={`https://chromewebstore.google.com/search/${wallet.name}`}>
                                             {wallet.icon ? (
